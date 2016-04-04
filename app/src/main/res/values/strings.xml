@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">RD4800</string>
+    <string name="fileBtn">文件</string>
+    <string name="settingBtn">设置</string>
+    <string name="graphBtn">曲线</string>
+    <string name="resultBtn">结果</string>
+    <string name="toolBtn">工具</string>
+    <string name="newFile">新建</string>
+    <string name="openFile">打开</string>
+    <string name="saveFile">另存</string>
+    <string name="runBtn">运行</string>
+    <string name="stopBtn">停止</string>
+</resources>

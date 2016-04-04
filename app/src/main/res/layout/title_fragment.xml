@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/titleBackColor">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="#f0f0f0"
+            android:textSize="20dp"
+            android:textStyle="bold|italic"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/fileBtn"
+            android:id="@+id/fileFeature"
+            android:textColor="@color/textColor"
+            android:background="@color/titleBackColor"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/settingBtn"
+            android:id="@+id/settingFeature"
+            android:textColor="@color/textColor"
+            android:background="@color/titleBackColor"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/graphBtn"
+            android:id="@+id/graphFeature"
+            android:textColor="@color/textColor"
+            android:background="@color/titleBackColor"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/resultBtn"
+            android:id="@+id/resultFeature"
+            android:textColor="@color/textColor"
+            android:background="@color/titleBackColor"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/toolBtn"
+            android:id="@+id/toolFeature"
+            android:textColor="@color/textColor"
+            android:background="@color/titleBackColor"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>
