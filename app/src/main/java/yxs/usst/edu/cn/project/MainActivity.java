@@ -1,86 +1,150 @@
 package yxs.usst.edu.cn.project;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.util.ArrayList;
+import java.util.List;
 
-    private FileContentFragment fileFrag;
-    private SettingContentFragment settingFrag;
-    private FileContentFragment graphFrag;
-    private FileContentFragment resultFrag;
-    private FileContentFragment toolFrag;
+import yxs.usst.edu.cn.project.fragment.FileContentFragment;
+import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
+import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
+import yxs.usst.edu.cn.project.fragment.SettingContentFragment;
+import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
+import yxs.usst.edu.cn.project.util.FragmentAdapter;
 
-    private Button fileBtn;
-    private Button settingBtn;
-    private Button graphBtn;
-    private Button resultBtn;
-    private Button toolBtn;
+public class MainActivity extends FragmentActivity {
+
+    private List<Fragment> mFragmentList = new ArrayList<Fragment>();//all fragment
+    private FragmentAdapter mFragmentAdapter;
+    private ViewPager mViewPager;//id_fragment_content, show changed fragment content
+    Button fileFeature,settingFeature,graphFeature,resultFeature,toolFeature;
+    private FileContentFragment mFileFg;
+    private SettingContentFragment mSettingFg;
+    private GraphContentFragment mGraphFg;
+    private ResultContentFragment mResultFg;
+    private ToolContentFragment mToolRg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);//hide title
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);//full screen
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//keep screen light
         setContentView(R.layout.activity_main);
+        findAllControlById();
+        initFragmentView();
 
-        fileBtn = (Button) findViewById(R.id.fileFeature);
-        settingBtn = (Button) findViewById(R.id.settingFeature);
-        graphBtn = (Button) findViewById(R.id.graphFeature);
-        resultBtn = (Button) findViewById(R.id.resultFeature);
-        toolBtn = (Button) findViewById(R.id.toolFeature);
-
-        fileBtn.setOnClickListener(this);
-        settingBtn.setOnClickListener(this);
-
-        setDefaultFragment();
     }
 
-    private void setDefaultFragment(){
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
-        fileFrag = new FileContentFragment();
-        fileBtn.setBackgroundColor(getResources().getColor(R.color.btnColor));
-        transaction.replace(R.id.id_content, fileFrag);
-        transaction.commit();
+    private void findAllControlById() {
+        mViewPager = (ViewPager) this.findViewById(R.id.id_fragment_content);
+
+        fileFeature = (Button) this.findViewById(R.id.fileFeature);
+        fileFeature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(0);
+                resetTextView(0);
+            }
+        });
+        settingFeature = (Button) this.findViewById(R.id.settingFeature);
+        settingFeature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(1);
+                resetTextView(1);
+            }
+        });
+        graphFeature = (Button) this.findViewById(R.id.graphFeature);
+        graphFeature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(2);
+                resetTextView(2);
+            }
+        });
+        resultFeature = (Button) this.findViewById(R.id.resultFeature);
+        resultFeature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(3);
+                resetTextView(3);
+            }
+        });
+        toolFeature = (Button) this.findViewById(R.id.toolFeature);
+        toolFeature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewPager.setCurrentItem(4);
+                resetTextView(4);
+            }
+        });
+
     }
 
-    @Override
-    public void onClick(View v) {
-        FragmentManager fm = getFragmentManager();
-        // 开启Fragment事务
-        FragmentTransaction transaction = fm.beginTransaction();
-        switch (v.getId()) {
-            case R.id.fileFeature:
-                if (fileFrag == null) {
-                    fileFrag = new FileContentFragment();
-                }
-                fileBtn.setBackgroundColor(getResources().getColor(R.color.btnColor));
-                transaction.replace(R.id.id_content, fileFrag);
-                changeTitleBtnColor(R.id.fileFeature);
-                break;
-            case R.id.settingFeature:
-                if(settingFrag == null) {
-                    settingFrag = new SettingContentFragment();
-                }
-                settingBtn.setBackgroundColor(getResources().getColor(R.color.btnColor));
-                transaction.replace(R.id.id_content, settingFrag);
-                changeTitleBtnColor(R.id.settingFeature);
-                break;
+    private void initFragmentView() {
+        mFileFg = new FileContentFragment();
+        mSettingFg = new SettingContentFragment();
+        mGraphFg = new GraphContentFragment();
+        mResultFg = new ResultContentFragment();
+        mToolRg = new ToolContentFragment();
+        mFragmentList.add(mFileFg);
+        mFragmentList.add(mSettingFg);
+        mFragmentList.add(mGraphFg);
+        mFragmentList.add(mResultFg);
+        mFragmentList.add(mToolRg);
 
+        mFragmentAdapter = new FragmentAdapter(this.getSupportFragmentManager(), mFragmentList);
+        mViewPager.setAdapter(mFragmentAdapter);
+        mViewPager.setCurrentItem(0);
+        resetTextView(0);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                //
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                resetTextView(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
+    //重置颜色
+    private void resetTextView(int position) {
+        switch (position) {
+            case 0:
+                fileFeature.setBackgroundColor(getResources().getColor(R.color.btnColor));
+                changeTitleBtnColor(fileFeature.getId());
+                break;
+            case 1:
+                settingFeature.setBackgroundColor(getResources().getColor(R.color.btnColor));
+                changeTitleBtnColor(settingFeature.getId());
+                break;
+            case 2:
+                graphFeature.setBackgroundColor(getResources().getColor(R.color.btnColor));
+                changeTitleBtnColor(graphFeature.getId());
+                break;
+            case 3:
+                resultFeature.setBackgroundColor(getResources().getColor(R.color.btnColor));
+                changeTitleBtnColor(resultFeature.getId());
+                break;
+            case 4:
+                toolFeature.setBackgroundColor(getResources().getColor(R.color.btnColor));
+                changeTitleBtnColor(toolFeature.getId());
+                break;
         }
-        // transaction.addToBackStack();
-        // 事务提交
-        transaction.commit();
     }
-    //change title back button color
+
     private void changeTitleBtnColor(int btnId) {
         Integer[] allTitle = {R.id.fileFeature, R.id.settingFeature, R.id.graphFeature, R.id.resultFeature, R.id.toolFeature};
         for(int temp:allTitle) {
@@ -92,5 +156,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
 }
