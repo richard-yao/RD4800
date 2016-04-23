@@ -8,6 +8,19 @@
     <string name="newFile">新建</string>
     <string name="openFile">打开</string>
     <string name="saveFile">另存</string>
+    <string name="increaseGraph">扩增曲线</string>
+    <string name="decreaseGraph">溶解曲线</string>
     <string name="runBtn">运行</string>
     <string name="stopBtn">停止</string>
+    <string name="result_holePosition">孔位</string>
+    <string name="result_code">条码</string>
+    <string name="result_name">姓名</string>
+    <string name="result_sex">性别</string>
+    <string name="result_age">年龄</string>
+    <string name="result_project">项目</string>
+    <string name="result_dt">dt值</string>
+    <string name="result_result">结果</string>
+    <string name="result_remark">备注</string>
+    <string name="web_http">http://192.168.1.128:8080/RD4800</string>
+    <string name="test_http">http://www.weather.com.cn/data/sk/101010100.html</string>
 </resources>

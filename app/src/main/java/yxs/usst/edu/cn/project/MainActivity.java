@@ -1,6 +1,7 @@
 package yxs.usst.edu.cn.project;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +17,7 @@ import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
 import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
 import yxs.usst.edu.cn.project.fragment.SettingContentFragment;
 import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
+import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.util.FragmentAdapter;
 
 public class MainActivity extends FragmentActivity {
@@ -90,6 +92,12 @@ public class MainActivity extends FragmentActivity {
         mSettingFg = new SettingContentFragment();
         mGraphFg = new GraphContentFragment();
         mResultFg = new ResultContentFragment();
+        mResultFg.setListViewListener(new ListViewListener() {
+            @Override
+            public Context getMainContext() {
+                return getInstance();
+            }
+        });
         mToolRg = new ToolContentFragment();
         mFragmentList.add(mFileFg);
         mFragmentList.add(mSettingFg);
@@ -145,6 +153,7 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
+    //change title button background color
     private void changeTitleBtnColor(int btnId) {
         Integer[] allTitle = {R.id.fileFeature, R.id.settingFeature, R.id.graphFeature, R.id.resultFeature, R.id.toolFeature};
         for(int temp:allTitle) {
@@ -155,5 +164,10 @@ public class MainActivity extends FragmentActivity {
                 findViewById(temp).setBackgroundColor(getResources().getColor(R.color.titleBackColor));
             }
         }
+    }
+
+    //get context
+    private MainActivity getInstance() {
+        return this;
     }
 }
