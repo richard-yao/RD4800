@@ -13,21 +13,24 @@
             android:layout_height="wrap_content"
             android:id="@+id/newFile"
             android:layout_weight="1"
-            android:text="@string/newFile"/>
+            android:background="@mipmap/new_excel"
+            android:minHeight="150dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/openFile"
             android:layout_weight="1"
-            android:text="@string/openFile"/>
+            android:background="@mipmap/open_excel"
+            android:minHeight="150dp"/>
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/saveFile"
             android:layout_weight="1"
-            android:text="@string/saveFile"/>
+            android:background="@mipmap/save_excel"
+            android:minHeight="150dp"/>
 
     </LinearLayout>
 

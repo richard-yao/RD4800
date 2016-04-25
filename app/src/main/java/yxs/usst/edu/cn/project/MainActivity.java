@@ -8,17 +8,22 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import yxs.usst.edu.cn.project.fragment.FileContentFragment;
+import yxs.usst.edu.cn.project.fragment.FileDialogFragment;
 import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
 import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
 import yxs.usst.edu.cn.project.fragment.SettingContentFragment;
 import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
+import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.util.FragmentAdapter;
+import yxs.usst.edu.cn.project.util.MyUtil;
 
 public class MainActivity extends FragmentActivity {
 
@@ -31,6 +36,10 @@ public class MainActivity extends FragmentActivity {
     private GraphContentFragment mGraphFg;
     private ResultContentFragment mResultFg;
     private ToolContentFragment mToolRg;
+    private FileDialogFragment fileDialogFragment;
+
+    public List<Map<String, Object>> excelData = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +47,8 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         findAllControlById();
         initFragmentView();
-
     }
+
 
     private void findAllControlById() {
         mViewPager = (ViewPager) this.findViewById(R.id.id_fragment_content);
@@ -89,6 +98,37 @@ public class MainActivity extends FragmentActivity {
 
     private void initFragmentView() {
         mFileFg = new FileContentFragment();
+        mFileFg.setListViewListener(new ListViewListener() {
+            @Override
+            public Context getMainContext() {
+                return getInstance();
+            }
+        });
+        mFileFg.setCreateDialog(new CreateDialog() {
+            @Override
+            public void createOpenDialog() {
+                fileDialogFragment = new FileDialogFragment();
+                fileDialogFragment.setContext(getInstance());
+                fileDialogFragment.setSetExcelPath(new FileDialogFragment.SetExcelPath() {
+                    @Override
+                    public void excelPath(String path, String name) {
+                        resultFragmentData(path, name);
+                    }
+                });
+                fileDialogFragment.show(getSupportFragmentManager(), "Open file");
+            }
+
+            @Override
+            public void createNewDialog() {
+
+            }
+
+            @Override
+            public void createSaveDialog() {
+
+            }
+        });
+
         mSettingFg = new SettingContentFragment();
         mGraphFg = new GraphContentFragment();
         mResultFg = new ResultContentFragment();
@@ -96,6 +136,12 @@ public class MainActivity extends FragmentActivity {
             @Override
             public Context getMainContext() {
                 return getInstance();
+            }
+        });
+        mResultFg.setShowResultListData(new ResultContentFragment.ShowResultListData() {
+            @Override
+            public List<Map<String, Object>> showResultData() {
+                return excelData;
             }
         });
         mToolRg = new ToolContentFragment();
@@ -170,4 +216,14 @@ public class MainActivity extends FragmentActivity {
     private MainActivity getInstance() {
         return this;
     }
+
+    public void resultFragmentData(String filePath, String fileName) {
+        MyUtil mu = MyUtil.getInstance();
+        excelData = mu.readExcel(ResultContentFragment.items, fileName, getResources().getString(R.string.app_name));
+        Toast.makeText(this, "RD4800 get excel data successfully", Toast.LENGTH_SHORT).show();
+        if(excelData == null) {
+            excelData = mu.creatTestData(ResultContentFragment.items);
+        }
+    }
+
 }

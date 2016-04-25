@@ -30,7 +30,7 @@ import yxs.usst.edu.cn.project.util.MyUtil;
 /**
  * Created by Administrator on 2016/4/10.
  */
-public class GraphContentFragment extends Fragment{
+public class GraphContentFragment extends Fragment {
     private static String dataUrl = null;
     private LineChartView mainChart;
 

@@ -11,7 +11,7 @@ import yxs.usst.edu.cn.project.R;
 /**
  * Created by Administrator on 2016/4/10.
  */
-public class ToolContentFragment extends Fragment{
+public class ToolContentFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

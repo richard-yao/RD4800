@@ -11,7 +11,7 @@ import yxs.usst.edu.cn.project.R;
 /**
  * Created by Administrator on 2016/4/10.
  */
-public class SettingContentFragment extends Fragment{
+public class SettingContentFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){

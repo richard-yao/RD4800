@@ -1,12 +1,8 @@
 package yxs.usst.edu.cn.project.util;
 
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
-
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -31,6 +27,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
+import yxs.usst.edu.cn.project.R;
 
 /**
  * Created by Administrator on 2016/4/17.
@@ -85,15 +82,15 @@ public class MyUtil {
         return df.format(input);
     }
 
-    public List<Map<String, Object>> readExcelFile(String[] para, String fileName) {
+    public List<Map<String, Object>> readExcel(String[] para, String fileName, String directory) {
         try {
             List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
-                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/RD4800/"+fileName);
+                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName);
                 WorkbookSettings workbookSettings = new WorkbookSettings();
                 workbookSettings.setGCDisabled(true);
                 Workbook book = Workbook.getWorkbook(is, workbookSettings);
-                if(book.getNumberOfSheets() > 1) {
+                if(book.getNumberOfSheets() > 0) {
                     Sheet sheet = book.getSheet(0);
                     int rows = sheet.getRows();
                     int cols = sheet.getColumns();
@@ -116,51 +113,16 @@ public class MyUtil {
             }
             return result;
         } catch (Exception e) {
-            System.out.println(e);
-            return null;
-        }
-    }
-
-    public List<Map<String, Object>> parseExcel(String[] para, String fileName) {
-        HSSFWorkbook hssfWorkbook = null;
-        try {
-            List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-            if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
-                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath() + "/RD4800/" + fileName);
-                POIFSFileSystem poifsFileSystem = new POIFSFileSystem(is);
-                hssfWorkbook = new HSSFWorkbook(poifsFileSystem);
-                HSSFSheet hssfSheet = hssfWorkbook.getSheetAt(0);
-                int rows = hssfSheet.getLastRowNum();//last row index
-                if (rows > 0) {//contain lab data
-                    HSSFRow row = hssfSheet.getRow(0);
-                    int cols = row.getPhysicalNumberOfCells();
-                    for (int i = 1; i <= rows; i++) {
-                        Map<String, Object> temp = new HashMap<String, Object>();
-                        row = hssfSheet.getRow(i);
-                        for (int j = 0; j < cols; j++) {
-                            if (row.getCell(j) != null) {
-                                temp.put(para[j], row.getCell(j));
-                            } else {
-                                temp.put(para[j], "");
-                            }
-                        }
-                        result.add(temp);
-                    }
-                }
-                is.close();
-            }
-            return result;
-        } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 
-    public void createNewExcel(List<Map<String, Object>> data, String fileName, String[] para) {
+    public void createNewExcel(List<Map<String, Object>> data, String fileName, String[] para, String directory) {
         WritableWorkbook book = null;
         try {
             String[] itemsName = {"孔位", "条码", "姓名", "性别", "年龄", "项目", "dt值", "结果", "备注"};
-            book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/RD4800/"+fileName+".xls"));
+            book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
             WritableSheet sheet = book.createSheet("Lab_result", 0);
             for(int i=0;i<itemsName.length;i++) {
                 sheet.addCell(new Label(i, 0, itemsName[i]));
@@ -183,5 +145,23 @@ public class MyUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Map<String, Object>> creatTestData(String[] items) {
+        List<Map<String, Object>> result =new ArrayList<Map<String, Object>>();
+        int number = 1;
+        for(int j=0;j<20;j++) {
+            Map<String, Object> temp = new HashMap<String, Object>();
+            for(int i=0;i<items.length;i++) {
+                if(i == 0) {
+                    temp.put(items[i], getNumber(number));
+                } else {
+                    temp.put(items[i], getTwoPointData(Math.random()));
+                }
+            }
+            result.add(temp);
+            number++;
+        }
+        return result;
     }
 }
