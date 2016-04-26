@@ -5,8 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/RD4800.iml" filepath="$PROJECT_DIR$/RD4800.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/jxl-2.6.10/jxl-2.6.10.iml" filepath="$PROJECT_DIR$/jxl-2.6.10/jxl-2.6.10.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poi-3.7/poi-3.7.iml" filepath="$PROJECT_DIR$/poi-3.7/poi-3.7.iml" />
-      <module fileurl="file://$PROJECT_DIR$/poi-3.7/poi-3.7.iml" filepath="$PROJECT_DIR$/poi-3.7/poi-3.7.iml" />
     </modules>
   </component>
 </project>

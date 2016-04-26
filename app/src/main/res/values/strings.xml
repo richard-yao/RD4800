@@ -6,6 +6,7 @@
     <string name="resultBtn">结果</string>
     <string name="toolBtn">工具</string>
     <string name="newFile">新建</string>
+    <string name="fileName">文件名</string>
     <string name="openFile">打开</string>
     <string name="saveFile">另存</string>
     <string name="increaseGraph">扩增曲线</string>

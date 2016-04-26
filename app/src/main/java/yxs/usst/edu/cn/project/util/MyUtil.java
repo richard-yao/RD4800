@@ -1,6 +1,8 @@
 package yxs.usst.edu.cn.project.util;
 
 import android.os.Environment;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -118,26 +120,27 @@ public class MyUtil {
         return null;
     }
 
-    public void createNewExcel(List<Map<String, Object>> data, String fileName, String[] para, String directory) {
-        WritableWorkbook book = null;
+    public void createNewExcel(List<Map<String, Object>> data, String[] para, String fileName, String directory) {
         try {
             String[] itemsName = {"孔位", "条码", "姓名", "性别", "年龄", "项目", "dt值", "结果", "备注"};
-            book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
+            WritableWorkbook book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
             WritableSheet sheet = book.createSheet("Lab_result", 0);
             for(int i=0;i<itemsName.length;i++) {
                 sheet.addCell(new Label(i, 0, itemsName[i]));
                 sheet.setColumnView(i, 20);
             }
-            int row = 1;
-            if(data != null && data.size() > 0) {
-                for(Map<String, Object> temp:data) {
-                    sheet.addCell(new Label(0, row, getNumber(row)));
-                    for(int i=1;i<para.length;i++) {
-                        String value = (String) temp.get(para[i]);
-                        value = value == null?"":value;
-                        sheet.addCell(new Label(i, row, value));
+            if(data != null && para != null) {
+                int row = 1;
+                if(data.size() > 0) {
+                    for(Map<String, Object> temp:data) {
+                        sheet.addCell(new Label(0, row, getNumber(row)));
+                        for(int i=1;i<para.length;i++) {
+                            String value = (String) temp.get(para[i]);
+                            value = value == null?"":value;
+                            sheet.addCell(new Label(i, row, value));
+                        }
+                        row++;
                     }
-                    row++;
                 }
             }
             book.write();
@@ -163,5 +166,15 @@ public class MyUtil {
             number++;
         }
         return result;
+    }
+
+    public boolean validateText(String input) {//验证输入字符是否有效
+        char[] name_arr = input.toCharArray();
+        for(int i=0;i<name_arr.length;i++) {
+            if(input.charAt(i) == '*' || input.charAt(i) == '\\' || input.charAt(i) == '/' || input.charAt(i) == '|' || input.charAt(i) == '?' || input.charAt(i) == '>' || input.charAt(i) == '<') {
+                return  false;
+            }
+        }
+        return true;
     }
 }
