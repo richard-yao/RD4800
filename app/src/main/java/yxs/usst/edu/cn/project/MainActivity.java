@@ -20,6 +20,7 @@ import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
 import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
 import yxs.usst.edu.cn.project.fragment.SettingContentFragment;
 import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
+import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.util.FragmentAdapter;
@@ -139,6 +140,23 @@ public class MainActivity extends FragmentActivity {
         });
 
         mSettingFg = new SettingContentFragment();
+        mSettingFg.setListViewListener(new ListViewListener() {
+            @Override
+            public Context getMainContext() {
+                return getInstance();
+            }
+        });
+        mSettingFg.setCollectData(new CollectData() {
+            @Override
+            public void getDataFromDb(Map<String, String> paras) {
+                Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void stopGetData() {
+                Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
+            }
+        });
         mGraphFg = new GraphContentFragment();
         mResultFg = new ResultContentFragment();
         mResultFg.setListViewListener(new ListViewListener() {
