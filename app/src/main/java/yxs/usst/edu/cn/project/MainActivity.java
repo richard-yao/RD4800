@@ -98,6 +98,8 @@ public class MainActivity extends FragmentActivity {
 
     private void initFragmentView() {
         mFileFg = new FileContentFragment();
+        fileDialogFragment = new FileDialogFragment();
+        fileDialogFragment.setContext(getInstance());
         mFileFg.setListViewListener(new ListViewListener() {
             @Override
             public Context getMainContext() {
@@ -107,8 +109,7 @@ public class MainActivity extends FragmentActivity {
         mFileFg.setCreateDialog(new CreateDialog() {
             @Override
             public void createOpenDialog() {
-                fileDialogFragment = new FileDialogFragment();
-                fileDialogFragment.setContext(getInstance());
+                fileDialogFragment.setOpenFile(true);
                 fileDialogFragment.setSetExcelPath(new FileDialogFragment.SetExcelPath() {
                     @Override
                     public void excelPath(String path, String name) {
@@ -125,7 +126,15 @@ public class MainActivity extends FragmentActivity {
 
             @Override
             public void createSaveDialog() {
-
+                fileDialogFragment.setOpenFile(false);
+                FileDialogFragment.openResult = excelData;
+                /*fileDialogFragment.setSetExcelPath(new FileDialogFragment.SetExcelPath() {
+                    @Override
+                    public void excelPath(String path, String name) {
+                        resultFragmentData(path, name);
+                    }
+                });*/
+                fileDialogFragment.show(getSupportFragmentManager(), "Save file");
             }
         });
 
@@ -219,7 +228,7 @@ public class MainActivity extends FragmentActivity {
 
     public void resultFragmentData(String filePath, String fileName) {
         MyUtil mu = MyUtil.getInstance();
-        excelData = mu.readExcel(ResultContentFragment.items, fileName, getResources().getString(R.string.app_name));
+        excelData = mu.readExcel(ResultContentFragment.items, fileName, filePath);
         Toast.makeText(this, "RD4800 get excel data successfully", Toast.LENGTH_SHORT).show();
         if(excelData == null) {
             excelData = mu.creatTestData(ResultContentFragment.items);

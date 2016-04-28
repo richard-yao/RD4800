@@ -1,31 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:background="#fff">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/fileName"
-        android:textSize="20dp"
-        android:layout_weight="2"
-        android:gravity="right"
-        android:paddingRight="5dp"/>
+        android:paddingTop="5dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fileName"
+            android:textSize="16dp"
+            android:layout_weight="2"
+            android:gravity="right"
+            android:paddingRight="5dp"/>
 
-    <EditText
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/new_file_name"
+            android:textSize="16dp"
+            android:layout_weight="2"
+            android:hint="请输入文件名"
+            />
+        <!--android:background="@drawable/bg_edittext_normal"-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/input_file_name_tip"
+            android:layout_weight="2"
+            android:textSize="13dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/new_file_name"
-        android:textSize="20dp"
-        android:layout_weight="1"
-        android:hint="请输入文件名"
-        android:background="@drawable/bg_edit_text"
-        />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/input_file_name_tip"
-        android:layout_weight="2"/>
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="15dp">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:text="@string/sureBtn"
+            style="@style/popWinBtn"
+            android:layout_marginRight="40dp"
+            android:id="@+id/sureCreateExcel"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:text="@string/cancelBtn"
+            style="@style/popWinBtn"
+            android:id="@+id/cancelCreateExcel"
+            />
+    </LinearLayout>
+
 
 </LinearLayout>

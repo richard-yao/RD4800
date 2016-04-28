@@ -1,10 +1,11 @@
 package yxs.usst.edu.cn.project.fragment;
 
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
-
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
@@ -28,6 +26,10 @@ public class FileContentFragment extends Fragment {
     private Button newFile,openFile,saveFile;
     private ListViewListener listViewListener;
     private CreateDialog createDialog;
+    private EditText fileName;
+    private Button sureCreateBtn, cancelCreateBtn;
+    private TextView inputTip;
+
 
     public void setListViewListener(ListViewListener lvl) {
         this.listViewListener = lvl;
@@ -43,8 +45,6 @@ public class FileContentFragment extends Fragment {
         newFile = (Button) chatView.findViewById(R.id.newFile);
         openFile = (Button) chatView.findViewById(R.id.openFile);
         saveFile = (Button) chatView.findViewById(R.id.saveFile);
-        //fileDialogFragment = new FileDialogFragment();
-        //fileDialogFragment.setListViewListener(listViewListener);
         return chatView;
     }
     @Override
@@ -59,63 +59,91 @@ public class FileContentFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 newDialog();
-                //Toast.makeText(listViewListener.getMainContext(), "Click on new file button", Toast.LENGTH_SHORT).show();
             }
         });
         //open excel file
         openFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //fileDialogFragment.show(getFragmentManager(), "Open file");
                 createDialog.createOpenDialog();
-                //Toast.makeText(listViewListener.getMainContext(), "Click on open file button", Toast.LENGTH_SHORT).show();
             }
         });
         //save result to another file
         saveFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(listViewListener.getMainContext(), "Click on save file button", Toast.LENGTH_SHORT).show();
+                createDialog.createSaveDialog();
+            }
+        });
+    }
+
+    private void initNewFileDialog(View view, final AlertDialog alertDialog) {
+        fileName = (EditText) view.findViewById(R.id.new_file_name);
+        inputTip = (TextView) view.findViewById(R.id.input_file_name_tip);
+        sureCreateBtn = (Button) view.findViewById(R.id.sureCreateExcel);
+        cancelCreateBtn = (Button) view.findViewById(R.id.cancelCreateExcel);
+
+        TextWatcher textWatcher = new TextWatcher() {
+            String tempText;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tempText = s.toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                MyUtil mu = MyUtil.getInstance();
+                if(tempText.toString().trim().equals("")) {
+                    return;
+                }
+                if(!mu.validateText(tempText)) {
+                    inputTip.setText("文件名称含有非法字符!");
+                    inputTip.setTextColor(Color.RED);
+                    inputTip.setFocusable(true);
+                    inputTip.setFocusableInTouchMode(true);
+                    inputTip.requestFocus();
+                    sureCreateBtn.setClickable(false);
+                } else {
+                    sureCreateBtn.setClickable(true);
+                    inputTip.setText("");
+                }
+            }
+        };
+        fileName.addTextChangedListener(textWatcher);
+        sureCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyUtil mu = MyUtil.getInstance();
+                String newFile = fileName.getText().toString().trim();
+                if(newFile.equals("")) {
+                    return;
+                }
+                mu.createNewExcel(null, null, newFile, getResources().getString(R.string.app_name));
+                Toast.makeText(listViewListener.getMainContext(), "new excel file successfully!", Toast.LENGTH_SHORT).show();
+                alertDialog.dismiss();
+            }
+        });
+        cancelCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
             }
         });
     }
 
     private void newDialog() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(listViewListener.getMainContext());
+        final AlertDialog alertDialog = new AlertDialog.Builder(listViewListener.getMainContext()).create();
         alertDialog.setTitle("请输入新建excel文件名");
         alertDialog.setIcon(R.mipmap.ic_launcher);
         final View newView = LayoutInflater.from(listViewListener.getMainContext()).inflate(R.layout.new_file_dialog,null);
-        /*EditText fileName = new EditText(listViewListener.getMainContext());
-        fileName.setFilters(mu.validateText());*/
         alertDialog.setView(newView);
-        alertDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                MyUtil mu = MyUtil.getInstance();
-                EditText fileName = (EditText) newView.findViewById(R.id.new_file_name);
-                if(fileName.getText() != null) {
-                    String name = fileName.getText().toString().trim();
-                    if(mu.validateText(name)) {
-                        Toast.makeText(listViewListener.getMainContext(), "RD4800 show edittext success", Toast.LENGTH_SHORT).show();
-                        mu.createNewExcel(null, null, fileName.getText().toString().trim(), getResources().getString(R.string.app_name));
-                        dialog.dismiss();
-                    } else {
-                        fileName.setFocusable(true);
-                        fileName.setFocusableInTouchMode(true);
-                        fileName.requestFocus();
-                        TextView tipText = (TextView) newView.findViewById( R.id.input_file_name_tip);
-                        tipText.setText("文件名含有非法字符，请重新输入");
-                        tipText.setTextColor(Color.RED);
-                        return;
-                    }
-                }
+        initNewFileDialog(newView, alertDialog);
+        alertDialog.show();
 
-            }
-        }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        }).create().show();
     }
 }

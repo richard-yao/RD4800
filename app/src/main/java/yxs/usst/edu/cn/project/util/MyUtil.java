@@ -88,7 +88,8 @@ public class MyUtil {
         try {
             List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
-                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName);
+                //InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName);
+                InputStream is = new FileInputStream(directory);
                 WorkbookSettings workbookSettings = new WorkbookSettings();
                 workbookSettings.setGCDisabled(true);
                 Workbook book = Workbook.getWorkbook(is, workbookSettings);
@@ -123,7 +124,13 @@ public class MyUtil {
     public void createNewExcel(List<Map<String, Object>> data, String[] para, String fileName, String directory) {
         try {
             String[] itemsName = {"孔位", "条码", "姓名", "性别", "年龄", "项目", "dt值", "结果", "备注"};
-            WritableWorkbook book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
+            WritableWorkbook book = null;
+            if(directory.startsWith("/")) {//directory but not file
+                book = Workbook.createWorkbook(new File(directory+"/"+fileName+".xls"));
+            } else {
+                book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
+            }
+            //WritableWorkbook book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
             WritableSheet sheet = book.createSheet("Lab_result", 0);
             for(int i=0;i<itemsName.length;i++) {
                 sheet.addCell(new Label(i, 0, itemsName[i]));
@@ -169,10 +176,11 @@ public class MyUtil {
     }
 
     public boolean validateText(String input) {//验证输入字符是否有效
+        input = input.toString().trim();
         char[] name_arr = input.toCharArray();
         for(int i=0;i<name_arr.length;i++) {
-            if(input.charAt(i) == '*' || input.charAt(i) == '\\' || input.charAt(i) == '/' || input.charAt(i) == '|' || input.charAt(i) == '?' || input.charAt(i) == '>' || input.charAt(i) == '<') {
-                return  false;
+            if(input.charAt(i) == ' ' || input.charAt(i) == '*' || input.charAt(i) == '\\' || input.charAt(i) == '/' || input.charAt(i) == '|' || input.charAt(i) == '?' || input.charAt(i) == '>' || input.charAt(i) == '<') {
+                return false;
             }
         }
         return true;

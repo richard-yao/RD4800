@@ -3,14 +3,24 @@ package yxs.usst.edu.cn.project.util;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -27,7 +37,6 @@ import yxs.usst.edu.cn.project.interface_class.CallbackBundle;
  */
 public class OpenFileDialog {
 
-    public static String tag = "OpenFileDialog";
     static final public String sRoot = "/";
     static final public String sParent = "..";
     static final public String sFolder = ".";
@@ -35,6 +44,18 @@ public class OpenFileDialog {
     static final private String sOnErrorMsg = "No rights to access!";
 
     public static Dialog staticDialog = null;
+
+    public static List<Map<String, Object>> resultData = null;
+    public static String[] para = null;
+
+    private EditText fileName;
+    private Button sureCreateBtn, cancelCreateBtn;
+    private TextView inputTip;
+
+    public static OpenFileDialog openFileDialog = new OpenFileDialog();
+    public static OpenFileDialog getInstance() {
+        return  openFileDialog;
+    }
 
     // 参数说明
     // context:上下文
@@ -48,14 +69,106 @@ public class OpenFileDialog {
     //	文件夹的索引为sFolder;
     //	默认图标的索引为sEmpty;
     //	其他的直接根据后缀进行索引，比如.wav文件图标的索引为"wav"
-    public static Dialog createDialog(Context context, String title, CallbackBundle callback, String suffix, Map<String, Integer> images) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setView(new FileSelectView(context, callback, suffix, images));
-        Dialog dialog = builder.create();
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        staticDialog = dialog;
+    public Dialog createDialog(final Context context, int type , CallbackBundle callback, String suffix, Map<String, Integer> images) {
+        AlertDialog builder = new AlertDialog.Builder(context).create();
+        RelativeLayout showView = new RelativeLayout(context);
+        final FileSelectView fileSelectView = new FileSelectView(context, callback, suffix, images, type);
+        showView.addView(fileSelectView, 0);
+         if(type == 2) {//save file
+             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) fileSelectView.getLayoutParams();
+             lp.setMargins(0, 0, 0, 200);
+             fileSelectView.setLayoutParams(lp);
+             final LinearLayout childView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.new_file_dialog, showView, false);//file name when save file button click
+             lp = (RelativeLayout.LayoutParams) childView.getLayoutParams();
+             lp.setMargins(0, -20, 0 , 0);
+             showView.addView(childView, 1);
+             initNewFileDialog(childView, builder, fileSelectView, context);
+        }
+        builder.setView(showView);
+        builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        staticDialog = builder;
         //dialog.setTitle(title);
-        return dialog;
+        return builder;
+    }
+
+    public void initNewFileDialog(final View view, final AlertDialog alertDialog, final FileSelectView fileSelectView, final Context context) {
+        fileName = (EditText) view.findViewById(R.id.new_file_name);
+        inputTip = (TextView) view.findViewById(R.id.input_file_name_tip);
+        sureCreateBtn = (Button) view.findViewById(R.id.sureCreateExcel);
+        cancelCreateBtn = (Button) view.findViewById(R.id.cancelCreateExcel);
+
+        TextWatcher textWatcher = new TextWatcher() {
+            String tempText;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                tempText = s.toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                MyUtil mu = MyUtil.getInstance();
+                if(tempText.toString().trim().equals("")) {
+                    return;
+                }
+                if(!mu.validateText(tempText)) {
+                    inputTip.setText("文件名称含有非法字符!");
+                    inputTip.setTextColor(Color.RED);
+                    inputTip.setFocusable(true);
+                    inputTip.setFocusableInTouchMode(true);
+                    inputTip.requestFocus();
+                    sureCreateBtn.setClickable(false);
+                } else {
+                    sureCreateBtn.setClickable(true);
+                    inputTip.setText("");
+                }
+            }
+        };
+        fileName.addTextChangedListener(textWatcher);
+        sureCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MyUtil mu = MyUtil.getInstance();
+                String newFile = fileName.getText().toString().trim();
+                if(newFile.equals("")) {
+                    Toast.makeText(context, "Please input excel file name.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(resultData == null) {
+                    Toast.makeText(context, "You cannot save as another excel when there is none data", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Bundle directroy = fileSelectView.getFileParaBack();
+                String filepath = "";
+                if(directroy == null) {//没有点击进入,就在程序目录
+                    filepath = fileSelectView.getPath();//default directory
+                } else {
+                    filepath = directroy.getString("path");
+                }
+                if(filepath != null && !filepath.equals("")) {
+                    if(filepath.endsWith(".xls")) {
+                        filepath = filepath.substring(0, filepath.lastIndexOf("/"));
+                    }
+                    mu.createNewExcel(resultData, para, newFile, filepath);
+                    resultData = null;
+                    alertDialog.dismiss();
+                    Toast.makeText(context, "Save as another excel file successfully!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("RD4800", "Cannot get directory");
+                }
+
+            }
+        });
+        cancelCreateBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertDialog.dismiss();
+            }
+        });
     }
 
     static class FileSelectView extends ListView implements OnItemClickListener {
@@ -66,11 +179,16 @@ public class OpenFileDialog {
 
         private Map<String, Integer> imagemap = null;
 
-        public FileSelectView(Context context, CallbackBundle callback, String suffix, Map<String, Integer> images) {
+        private int type = 0;
+
+        private Bundle fileParas = null;
+
+        public FileSelectView(Context context, CallbackBundle callback, String suffix, Map<String, Integer> images, int type) {
             super(context);
             this.imagemap = images;
             this.suffix = suffix == null ? "" : suffix.toLowerCase();
             this.callback = callback;
+            this.type = type;
             this.setOnItemClickListener(this);
             refreshFileList();
         }
@@ -177,18 +295,27 @@ public class OpenFileDialog {
                     // 返回上一层
                     path = ppt;
                 } else {
-                    // 返回更目录
+                    // 返回根目录
                     path = sRoot;
                 }
+                Bundle bundle = new Bundle();
+                bundle.putString("path", path);
+                bundle.putString("name", fn);
+                fileParas = bundle;
             } else {
                 File fl = new File(pt);
                 if (fl.isFile()) {
-                    // 如果是文件
-                    staticDialog.dismiss();
+                    if(type == 1) {
+                        // 如果是文件
+                        staticDialog.dismiss();
+                    } else if(type == 2) {
+                        return;
+                    }
                     // 设置回调的返回值
                     Bundle bundle = new Bundle();
                     bundle.putString("path", pt);
                     bundle.putString("name", fn);
+                    fileParas = bundle;
                     // 调用事先设置的回调函数
                     this.callback.callback(bundle);
                     return;
@@ -200,5 +327,15 @@ public class OpenFileDialog {
             }
             this.refreshFileList();
         }
+
+
+        public Bundle getFileParaBack() {
+            return fileParas;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
     }
 }
