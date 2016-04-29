@@ -7,7 +7,9 @@ import java.util.Map;
  */
 public interface CollectData {
 
+    public void useInstancePara(Map<String, String> paras);
+
     public void getDataFromDb(Map<String, String> paras);
 
-    public void stopGetData();
+    public void stopGetData(Map<String, String> paras);
 }

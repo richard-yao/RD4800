@@ -1,14 +1,17 @@
 package yxs.usst.edu.cn.project.util;
 
+import android.graphics.Color;
 import android.os.Environment;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,9 +20,11 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import jxl.Sheet;
 import jxl.Workbook;
@@ -184,5 +189,74 @@ public class MyUtil {
             }
         }
         return true;
+    }
+
+    public Map<String, Object> getLabDataFromPhone() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, List<String>> famResult = new HashMap<String, List<String>>();
+        Map<String, List<String>> hexResult = new HashMap<String, List<String>>();
+        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
+            try {
+                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/Labdata/lab_data.xls");
+                WorkbookSettings workbookSettings = new WorkbookSettings();
+                workbookSettings.setGCDisabled(true);
+                Workbook book = Workbook.getWorkbook(is, workbookSettings);
+                if(book.getNumberOfSheets() == 2) {//测试数据，共有两个，一为FAM，一为HEX
+                    Sheet famSheet = book.getSheet(0);
+                    Sheet hexSheet = book.getSheet(1);
+                    famResult = getSheetData(famSheet);
+                    hexResult = getSheetData(hexSheet);
+                    result.put("FAM", famResult);
+                    result.put("HEX", hexResult);
+                    book.close();
+                    is.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+        return result;
+    }
+
+    public Map<String, List<String>> getSheetData(Sheet sheet) {
+        Map<String, List<String>> result = new HashMap<String, List<String>>();
+        int rows = sheet.getRows();
+        int cols = sheet.getColumns();
+        if(rows > 1) {//contain lab data
+            for (int i = 1; i < rows ; i++) {
+                String hole = sheet.getCell(0, i).getContents();//数量
+                for (int j = 2; j < cols ; j++) {
+                    if(result.get(hole) != null) {
+                        result.get(hole).add(sheet.getCell(j, i).getContents());
+                    } else {
+                        List<String> tempList = new ArrayList<String>();
+                        tempList.add(sheet.getCell(j, i).getContents());
+                        result.put(hole, tempList);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public void setRunbtnOnClickable(Button startBtn, Button stopBtn) {
+        if(startBtn == null || stopBtn == null) {//程序最开始，按钮还未实例化
+            return;
+        }
+        startBtn.setClickable(true);
+        startBtn.setTextColor(Color.BLACK);
+        stopBtn.setClickable(false);
+        stopBtn.setTextColor(Color.GRAY);
+    }
+
+    public void setStopbtnOnClickable(Button startBtn, Button stopBtn) {
+        if(startBtn == null || stopBtn == null) {//程序最开始，按钮还未实例化
+            return;
+        }
+        startBtn.setClickable(false);
+        startBtn.setTextColor(Color.GRAY);
+        stopBtn.setClickable(true);
+        stopBtn.setTextColor(Color.BLACK);
     }
 }

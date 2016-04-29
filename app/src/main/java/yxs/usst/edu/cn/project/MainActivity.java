@@ -3,11 +3,13 @@ package yxs.usst.edu.cn.project;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -40,7 +42,15 @@ public class MainActivity extends FragmentActivity {
     private FileDialogFragment fileDialogFragment;
 
     public List<Map<String, Object>> excelData = null;
+    public Map<String, String> settingParas = null;
+    //map参数中所有参数的key值
+    public static String[] settingParasName = {"hex_graph_choice","default_temp_choice","dissolution_graph_choice","stop_dissolution_temp_choice","default_count_temp_choice",
+            "default_temp_edit","default_keeptime_edit","dissolution_tempnum_edit","change_stoptemp_edit","change_counttemp_edit","run"};
+    private Map<String, Object> labData;//扩增曲线数据
+    private static int refreshTime = 60*1000;
+    private int runTime = 0;
 
+    private TextView showTempText,showRunType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +68,12 @@ public class MainActivity extends FragmentActivity {
         fileFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mViewPager.getCurrentItem() == 1) {
+                    settingParas = mSettingFg.getParas();
+                }
+                if(mViewPager.getCurrentItem() == 2) {
+                    mGraphFg.setParas(settingParas);
+                }
                 mViewPager.setCurrentItem(0);
                 resetTextView(0);
             }
@@ -66,6 +82,9 @@ public class MainActivity extends FragmentActivity {
         settingFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mViewPager.getCurrentItem() == 2) {
+                    mGraphFg.setParas(settingParas);
+                }
                 mViewPager.setCurrentItem(1);
                 resetTextView(1);
             }
@@ -74,6 +93,10 @@ public class MainActivity extends FragmentActivity {
         graphFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mViewPager.getCurrentItem() == 1) {
+                    settingParas = mSettingFg.getParas();
+                }
+                mGraphFg.setParas(settingParas);
                 mViewPager.setCurrentItem(2);
                 resetTextView(2);
             }
@@ -82,6 +105,12 @@ public class MainActivity extends FragmentActivity {
         resultFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mViewPager.getCurrentItem() == 1) {
+                    settingParas = mSettingFg.getParas();
+                }
+                if(mViewPager.getCurrentItem() == 2) {
+                    mGraphFg.setParas(settingParas);
+                }
                 mViewPager.setCurrentItem(3);
                 resetTextView(3);
             }
@@ -90,11 +119,18 @@ public class MainActivity extends FragmentActivity {
         toolFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(mViewPager.getCurrentItem() == 1) {
+                    settingParas = mSettingFg.getParas();
+                }
+                if(mViewPager.getCurrentItem() == 2) {
+                    mGraphFg.setParas(settingParas);
+                }
                 mViewPager.setCurrentItem(4);
                 resetTextView(4);
             }
         });
-
+        showTempText = (TextView) this.findViewById(R.id.showTempText);
+        showRunType = (TextView) this.findViewById(R.id.showRunType);
     }
 
     private void initFragmentView() {
@@ -129,12 +165,6 @@ public class MainActivity extends FragmentActivity {
             public void createSaveDialog() {
                 fileDialogFragment.setOpenFile(false);
                 FileDialogFragment.openResult = excelData;
-                /*fileDialogFragment.setSetExcelPath(new FileDialogFragment.SetExcelPath() {
-                    @Override
-                    public void excelPath(String path, String name) {
-                        resultFragmentData(path, name);
-                    }
-                });*/
                 fileDialogFragment.show(getSupportFragmentManager(), "Save file");
             }
         });
@@ -148,16 +178,55 @@ public class MainActivity extends FragmentActivity {
         });
         mSettingFg.setCollectData(new CollectData() {
             @Override
+            public void useInstancePara(Map<String, String> paras) {
+                settingParas = paras;
+            }
+
+            @Override
             public void getDataFromDb(Map<String, String> paras) {
+                settingParas = paras;
+                mGraphFg.setStopbtnOnClickable();
+                startGetDataFromDb();
                 Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void stopGetData() {
+            public void stopGetData(Map<String, String> paras) {
+                settingParas = paras;
+                mGraphFg.setRunbtnOnClickable();
+                stopGetDataFromDb();
                 Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
         });
         mGraphFg = new GraphContentFragment();
+        mGraphFg.setListViewListener(new ListViewListener() {
+            @Override
+            public Context getMainContext() {
+                return getInstance();
+            }
+        });
+        mGraphFg.setCollectData(new CollectData() {
+            @Override
+            public void useInstancePara(Map<String, String> paras) {
+                settingParas = paras;
+            }
+
+            @Override
+            public void getDataFromDb(Map<String, String> paras) {
+                settingParas = paras;
+                mSettingFg.setStopbtnOnClickable();
+                startGetDataFromDb();
+                Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void stopGetData(Map<String, String> paras) {
+                settingParas = paras;
+                mSettingFg.setRunbtnOnClickable();
+                stopGetDataFromDb();
+                Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
+            }
+        });
         mResultFg = new ResultContentFragment();
         mResultFg.setListViewListener(new ListViewListener() {
             @Override
@@ -182,15 +251,22 @@ public class MainActivity extends FragmentActivity {
         mViewPager.setAdapter(mFragmentAdapter);
         mViewPager.setCurrentItem(0);
         resetTextView(0);
+        mViewPager.setOffscreenPageLimit(5);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                //
+                if(position == 1) {
+                    settingParas = mSettingFg.getParas();//当setting页面滑动时，main获得设置的参数
+                    mGraphFg.setParas(settingParas);
+                }
             }
 
             @Override
             public void onPageSelected(int position) {
                 resetTextView(position);
+                if(position == 3) {
+                    mResultFg.showResultData();
+                }
             }
 
             @Override
@@ -251,6 +327,40 @@ public class MainActivity extends FragmentActivity {
         if(excelData == null) {
             excelData = mu.creatTestData(ResultContentFragment.items);
         }
+    }
+
+    MyUtil mu = MyUtil.getInstance();
+    Handler handler = new Handler();
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            runTime++;
+            labData = mu.getLabDataFromPhone();
+            mGraphFg.setLabData(labData);
+            mGraphFg.drawChart(runTime);
+            handler.postDelayed(this, refreshTime);
+            Toast.makeText(getInstance(), "Get data from excel", Toast.LENGTH_SHORT).show();
+            if(settingParas != null) {
+                Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
+                if(runTime >= temp) {
+                    stopGetDataFromDb();
+                    runTime = 0;
+                }
+            }
+        }
+    };
+
+    public void startGetDataFromDb() {//运行
+        showRunType.setText("运行");
+        if(settingParas.get("default_temp_edit") != null) {
+            showTempText.setText(settingParas.get("default_temp_edit")+"℃");
+        }
+        handler.post(runnable);
+    }
+
+    public void stopGetDataFromDb() {//停止
+        showRunType.setText("停止");
+        handler.removeCallbacks(runnable);
     }
 
 }

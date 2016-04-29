@@ -9,4 +9,9 @@
     <color name="backColor">#D1EEEE</color>
     <color name="settingBackColor">#EBEBEB</color>
     <color name="editBorder">#444</color>
+    <color name="cannotClick">#808080</color>
+    <color name="aqua">#00FFFF</color>
+    <color name="magenta">#ff00ff</color>
+    <color name="purple">#800080</color>
+    <color name="godenrod">#daa520</color>
 </resources>

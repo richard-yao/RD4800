@@ -25,7 +25,9 @@
                     android:text="@string/stopBtn"
                     android:background="@drawable/btn_style"
                     android:id="@+id/stopRecordData"
-                    android:layout_marginRight="10dp"/>
+                    android:layout_marginRight="10dp"
+                    android:clickable="false"
+                    android:textColor="@color/cannotClick"/>
 
             </LinearLayout>
         <LinearLayout

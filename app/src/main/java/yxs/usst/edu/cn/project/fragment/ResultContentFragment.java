@@ -61,17 +61,6 @@ public class ResultContentFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-        if(listViewListener != null) {
-            //Toast.makeText(listViewListener.getMainContext(), Environment.getExternalStorageDirectory().getPath()+"/RD4800/", Toast.LENGTH_SHORT).show();
-            resultData = showResultListData.showResultData();
-            if(resultData != null && resultData.size() > 0) {
-                SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(),resultData,
-                        R.layout.result_list_item, items, itemId);
-                resultLv.setAdapter(simpleAdapter);
-            } else {
-                Toast.makeText(listViewListener.getMainContext(), "RD4800: result data is null", Toast.LENGTH_SHORT).show();
-            }
-        }
         return;
     }
 
@@ -94,6 +83,17 @@ public class ResultContentFragment extends Fragment {
         }
         mu.createNewExcel(result, mu.getTwoPointData(Math.random()), items, getResources().getString(R.string.app_name);*/
         return result;
+    }
+
+    public void showResultData() {
+        resultData = showResultListData.showResultData();
+        if(resultData != null && resultData.size() > 0) {
+            SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(),resultData,
+                    R.layout.result_list_item, items, itemId);
+            resultLv.setAdapter(simpleAdapter);
+        } else {
+            //Toast.makeText(listViewListener.getMainContext(), "RD4800: result data is null", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

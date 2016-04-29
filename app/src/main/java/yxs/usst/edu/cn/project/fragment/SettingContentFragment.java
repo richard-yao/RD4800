@@ -3,6 +3,8 @@ package yxs.usst.edu.cn.project.fragment;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import java.util.Map;
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
+import yxs.usst.edu.cn.project.util.MyUtil;
 
 /**
  * Created by Administrator on 2016/4/10.
@@ -41,9 +44,6 @@ public class SettingContentFragment extends Fragment {
     }
 
     private Map<String, String> paras = new HashMap<String, String>();
-    //map参数中所有参数的key值
-    public static String[] itemsName = {"hex_graph_choice","default_temp_choice","dissolution_graph_choice","stop_dissolution_temp_choice","default_count_temp_choice",
-                            "default_temp_edit","default_keeptime_edit","dissolution_tempnum_edit","change_stoptemp_edit","change_counttemp_edit"};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -69,7 +69,28 @@ public class SettingContentFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
         bindCheckBoxListener();
+        bindEditTextListener();
         bindButtonListener();
+        if(paras != null && paras.get("run") != null) {
+            if(paras.get("run").equals("true")) {
+                collectData.getDataFromDb(paras);
+                setStopbtnOnClickable();
+            } else if(paras.get("run").equals("false")){
+                collectData.stopGetData(paras);
+                setRunbtnOnClickable();
+            }
+        }
+        collectData.useInstancePara(paras);//实例化时，将参数传到activity
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+    }
+
+    public Map<String, String> getParas() {
+        return paras;
     }
 
     private void bindCheckBoxListener() {
@@ -84,6 +105,7 @@ public class SettingContentFragment extends Fragment {
                 }
             }
         });
+
         paras.put("default_temp_choice", "true");
         setEditTextReadOnly(changeDefaultTemp);//默认温度选中，则编辑框无法更改
         defaultTemp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -99,9 +121,12 @@ public class SettingContentFragment extends Fragment {
                 }
             }
         });
+
         paras.put("dissolution_graph_choice", "false");
         setEditTextReadOnly(dissolutionTempNum);
+        setCheckboxFalse(stopDissolutionTemp);
         setEditTextReadOnly(changeDefaultStopTemp);
+        setCheckboxFalse(defaultCountTemp);
         setEditTextReadOnly(changeDefaultCountTemp);
         dissolutionGraph.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -109,44 +134,19 @@ public class SettingContentFragment extends Fragment {
                 if(isChecked) {
                     paras.put("dissolution_graph_choice", "true");
                     setEditTextEditable(dissolutionTempNum);//选中后，起始温度可编辑
+                    setCheckboxTrue(stopDissolutionTemp);
                     stopDissolutionTemp.setChecked(true);//选中后，结束温度默认自动勾选
+                    setCheckboxTrue(defaultCountTemp);
                     defaultCountTemp.setChecked(true);//选中后，度数误差默认自动勾选
                 } else {
                     paras.put("dissolution_graph_choice", "false");
                     setEditTextReadOnly(dissolutionTempNum);//未选中，起始温度不可编辑
-                    stopDissolutionTemp.setChecked(false);//未选中，结束温度无法勾选
-                    defaultCountTemp.setChecked(false);//未选中，度数误差无法勾选
+                    setCheckboxFalse(stopDissolutionTemp);//未选中，另外两个checkbox无法点击
+                    setCheckboxFalse(defaultCountTemp);
                 }
             }
         });
-       /* stopDissolutionTemp.setOnClickListener(new View.OnClickListener() {//根据溶解曲线选中情况判断是否选中结束温度
-            @Override
-            public void onClick(View v) {
-                if(!dissolutionGraph.isChecked()) {
-                    stopDissolutionTemp.setChecked(false);
-                } else {//溶解曲线选中
-                    if(stopDissolutionTemp.isChecked()) {
-                        stopDissolutionTemp.setChecked(false);
-                    } else {
-                        stopDissolutionTemp.setChecked(true);
-                    }
-                }
-            }
-        });
-        defaultCountTemp.setOnClickListener(new View.OnClickListener() {//根据溶解曲线选中情况判断是否选中度数温差
-            @Override
-            public void onClick(View v) {
-                if(!dissolutionGraph.isChecked()) {
-                    defaultCountTemp.setChecked(false);
-                } else {//溶解曲线选中
-                    if(defaultCountTemp.isChecked()) {
-                        defaultCountTemp.setChecked(false);
-                    } else {
-                        defaultCountTemp.setChecked(true);
-                    }
-                }
-            }
-        });*/
+
         paras.put("stop_dissolution_temp_choice", "false");
         stopDissolutionTemp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -167,6 +167,7 @@ public class SettingContentFragment extends Fragment {
                 }
             }
         });
+
         paras.put("default_count_temp_choice", "false");
         defaultCountTemp.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -190,7 +191,62 @@ public class SettingContentFragment extends Fragment {
         });
     }
 
+    private void bindEditTextListener() {
+        paras.put("default_temp_edit", changeDefaultTemp.getText().toString().trim());
+        paras.put("default_keeptime_edit", keepTempTime.getText().toString().trim());
+        paras.put("dissolution_tempnum_edit", dissolutionTempNum.getText().toString().trim());
+        paras.put("change_stoptemp_edit", changeDefaultStopTemp.getText().toString().trim());
+        paras.put("change_counttemp_edit", changeDefaultCountTemp.getText().toString().trim());
+        paras.put("run", "false");//开始未扫描
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(changeDefaultTemp.getText().toString().trim().equals("")) {
+                    getEditFocus(changeDefaultTemp);
+                } else {
+                    paras.put("default_temp_edit", changeDefaultTemp.getText().toString().trim());
+                }
+                if(keepTempTime.getText().toString().trim().equals("")) {
+                    getEditFocus(keepTempTime);
+                } else {
+                    paras.put("default_keeptime_edit", keepTempTime.getText().toString().trim());
+                }
+                if(dissolutionTempNum.getText().toString().trim().equals("")) {
+                    getEditFocus(dissolutionTempNum);
+                } else {
+                    paras.put("dissolution_tempnum_edit", dissolutionTempNum.getText().toString().trim());
+                }
+                if(changeDefaultStopTemp.getText().toString().trim().equals("")) {
+                    getEditFocus(changeDefaultStopTemp);
+                } else {
+                    paras.put("change_stoptemp_edit", changeDefaultStopTemp.getText().toString().trim());
+                }
+                if(changeDefaultCountTemp.getText().toString().trim().equals("")) {
+                    getEditFocus(changeDefaultCountTemp);
+                } else {
+                    paras.put("change_counttemp_edit", changeDefaultCountTemp.getText().toString().trim());
+                }
+            }
+        };
+        changeDefaultTemp.addTextChangedListener(textWatcher);
+        keepTempTime.addTextChangedListener(textWatcher);
+        dissolutionTempNum.addTextChangedListener(textWatcher);
+        changeDefaultStopTemp.addTextChangedListener(textWatcher);
+        changeDefaultCountTemp.addTextChangedListener(textWatcher);
+    }
+
     private void bindButtonListener() {
+        paras.put("run", "false");
         startRecordData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -224,18 +280,19 @@ public class SettingContentFragment extends Fragment {
                 } else {
                     paras.put("change_counttemp_edit", changeDefaultCountTemp.getText().toString().trim());
                 }
+                paras.put("run", "true");
                 collectData.getDataFromDb(paras);
+                setStopbtnOnClickable();
             }
         });
-
         stopRecordData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                collectData.stopGetData();
+                paras.put("run", "false");
+                collectData.stopGetData(paras);
+                setRunbtnOnClickable();
             }
         });
-
-
     }
 
 
@@ -262,5 +319,28 @@ public class SettingContentFragment extends Fragment {
             view.setFocusableInTouchMode(true);
             view.requestFocus();
         }
+    }
+
+    private static void setCheckboxFalse(CheckBox view) {
+        if(view != null) {
+            view.setClickable(false);
+            view.setEnabled(false);
+        }
+    }
+
+    private static void setCheckboxTrue(CheckBox view) {
+        if(view != null) {
+            view.setClickable(true);
+            view.setEnabled(true);
+        }
+    }
+
+    MyUtil mu = MyUtil.getInstance();
+    public void setStopbtnOnClickable() {
+        mu.setStopbtnOnClickable(startRecordData, stopRecordData);
+    }
+
+    public void setRunbtnOnClickable() {
+        mu.setRunbtnOnClickable(startRecordData, stopRecordData);
     }
 }
