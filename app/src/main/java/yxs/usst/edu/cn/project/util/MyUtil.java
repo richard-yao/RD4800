@@ -191,7 +191,7 @@ public class MyUtil {
         return true;
     }
 
-    public Map<String, Object> getLabDataFromPhone() {
+    public Map<String, Object> getLabDataFromPhone(int type) {
         Map<String, Object> result = new HashMap<String, Object>();
         Map<String, List<String>> famResult = new HashMap<String, List<String>>();
         Map<String, List<String>> hexResult = new HashMap<String, List<String>>();
@@ -202,12 +202,18 @@ public class MyUtil {
                 workbookSettings.setGCDisabled(true);
                 Workbook book = Workbook.getWorkbook(is, workbookSettings);
                 if(book.getNumberOfSheets() == 2) {//测试数据，共有两个，一为FAM，一为HEX
-                    Sheet famSheet = book.getSheet(0);
-                    Sheet hexSheet = book.getSheet(1);
-                    famResult = getSheetData(famSheet);
-                    hexResult = getSheetData(hexSheet);
-                    result.put("FAM", famResult);
-                    result.put("HEX", hexResult);
+                    if(type == 2) {//双通道
+                        Sheet famSheet = book.getSheet(0);
+                        Sheet hexSheet = book.getSheet(1);
+                        famResult = getSheetData(famSheet);
+                        hexResult = getSheetData(hexSheet);
+                        result.put("FAM", famResult);
+                        result.put("HEX", hexResult);
+                    } else if(type == 1) {//单通道
+                        Sheet famSheet = book.getSheet(0);
+                        famResult = getSheetData(famSheet);
+                        result.put("FAM", famResult);
+                    }
                     book.close();
                     is.close();
                 }

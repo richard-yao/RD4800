@@ -199,6 +199,7 @@ public class MainActivity extends FragmentActivity {
             }
         });
         mGraphFg = new GraphContentFragment();
+        mGraphFg.setShowHoleChart();
         mGraphFg.setListViewListener(new ListViewListener() {
             @Override
             public Context getMainContext() {
@@ -225,6 +226,12 @@ public class MainActivity extends FragmentActivity {
                 mSettingFg.setRunbtnOnClickable();
                 stopGetDataFromDb();
                 Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mGraphFg.setReDrawChart(new GraphContentFragment.ReDrawChart() {
+            @Override
+            public void reDrawChart() {
+                mGraphFg.drawChart(runTime);//重新绘制图形
             }
         });
         mResultFg = new ResultContentFragment();
@@ -335,7 +342,11 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void run() {
             runTime++;
-            labData = mu.getLabDataFromPhone();
+            if(settingParas.get("hex_graph_choice").equals("true")) {
+                labData = mu.getLabDataFromPhone(2);
+            } else {
+                labData = mu.getLabDataFromPhone(1);
+            }
             mGraphFg.setLabData(labData);
             mGraphFg.drawChart(runTime);
             handler.postDelayed(this, refreshTime);
@@ -344,7 +355,6 @@ public class MainActivity extends FragmentActivity {
                 Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
                 if(runTime >= temp) {
                     stopGetDataFromDb();
-                    runTime = 0;
                 }
             }
         }
@@ -355,12 +365,18 @@ public class MainActivity extends FragmentActivity {
         if(settingParas.get("default_temp_edit") != null) {
             showTempText.setText(settingParas.get("default_temp_edit")+"℃");
         }
+        if(settingParas.get("hex_graph_choice").equals("false")) {//如果设置页面没有勾选采集hex通道数据，则这里无法点击选择
+            mGraphFg.setHexCheckboxFalse();
+        } else if(settingParas.get("hex_graph_choice").equals("true")) {
+            mGraphFg.setHexCheckboxTrue();
+        }
         handler.post(runnable);
     }
 
     public void stopGetDataFromDb() {//停止
         showRunType.setText("停止");
         handler.removeCallbacks(runnable);
+        runTime = 0;
     }
 
 }

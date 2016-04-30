@@ -85,7 +85,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="HEX通道"
-                        android:textSize="18dp" />
+                        android:textSize="18dp"
+                        android:checked="true"/>
                 </LinearLayout>
 
                 <LinearLayout

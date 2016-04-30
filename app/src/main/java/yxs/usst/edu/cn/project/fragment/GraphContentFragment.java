@@ -1,6 +1,8 @@
 package yxs.usst.edu.cn.project.fragment;
 
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,6 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -28,7 +34,6 @@ import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.view.LineChartView;
-import yxs.usst.edu.cn.project.MainActivity;
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
@@ -41,8 +46,13 @@ public class GraphContentFragment extends Fragment {
     private static String dataUrl = null;
     private LineChartView mainChart;
     private Button increaseBtn,decreaseBtn,startRecordData,stopRecordData;
-    private Map<String, String> paras = new HashMap<String, String>();
-    private Map<String, Object> labData = null;
+    private LinearLayout holePart;
+    private CheckBox famCheckbox, hexCheckbox;
+    private Map<String, String> paras = new HashMap<String, String>();//设置页面所有运行参数
+    private Map<String, Object> labData = null;//采集的实验数据
+    private Map<String, String> showHoleChart = new HashMap<String, String>();//所有孔的显示状况
+    private Map<String, String> chartType = new HashMap<String, String>();//FAM/HEX显示情况
+    public static int[] colors = {Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.rgb(255,0,255),Color.rgb(128,0,128), Color.rgb(210,105,30)};
 
     public ListViewListener listViewListener;
     private CollectData collectData;
@@ -52,6 +62,16 @@ public class GraphContentFragment extends Fragment {
     }
     public void setListViewListener(ListViewListener listViewListener) {
         this.listViewListener = listViewListener;
+    }
+
+    public interface ReDrawChart {
+        public void reDrawChart();
+    }
+
+    public ReDrawChart reDrawChart;
+
+    public void setReDrawChart(ReDrawChart reDrawChart) {
+        this.reDrawChart = reDrawChart;
     }
 
     @Override
@@ -67,6 +87,11 @@ public class GraphContentFragment extends Fragment {
         decreaseBtn = (Button) chatView.findViewById(R.id.decreaseBtn);
         startRecordData = (Button) chatView.findViewById(R.id.startRecordData);
         stopRecordData = (Button) chatView.findViewById(R.id.stopRecordData);
+        holePart = (LinearLayout) chatView.findViewById(R.id.holePart);
+        famCheckbox = (CheckBox) chatView.findViewById(R.id.fam_checkbox);
+        hexCheckbox = (CheckBox) chatView.findViewById(R.id.hex_checkbox);
+        chartType.put("fam_checkbox", "true");
+        chartType.put("hex_checkbox", "false");
         return chatView;
     }
     @Override
@@ -82,6 +107,7 @@ public class GraphContentFragment extends Fragment {
                 setRunbtnOnClickable();
             }
         }
+        bindHolePartListener();
         //new MyAsyncTask().execute();
     }
 
@@ -89,11 +115,10 @@ public class GraphContentFragment extends Fragment {
         increaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] settingParasName = MainActivity.settingParasName;
-                if(paras.get(settingParasName[settingParasName.length-1]).equals("false")) {//扫描未运行
+                if(paras.get("run").equals("false")) {//扫描未运行
                     Toast.makeText(listViewListener.getMainContext(), "请先运行扫描程序", Toast.LENGTH_SHORT).show();
                     return;
-                } else if(paras.get(settingParasName[settingParasName.length-1]).equals("true")) {
+                } else if(paras.get("run").equals("true")) {
                     //drawChart();
                     mainChart.setVisibility(View.VISIBLE);
                 }
@@ -121,6 +146,65 @@ public class GraphContentFragment extends Fragment {
                 setRunbtnOnClickable();
             }
         });
+        famCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    chartType.put("fam_checkbox", "true");
+                } else {
+                    chartType.put("fam_checkbox", "false");
+                }
+                reDrawChart.reDrawChart();
+            }
+        });
+        hexCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    chartType.put("hex_checkbox", "true");
+                } else {
+                    chartType.put("hex_checkbox", "false");
+                }
+                reDrawChart.reDrawChart();
+            }
+        });
+    }
+
+    private void bindHolePartListener() {
+        Resources res = listViewListener.getMainContext().getResources();
+        Drawable draw=res.getDrawable(R.mipmap.circle_hole, null);
+        int number = 1;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
+        for(int i=0;i<8;i++) {//总共8行数据
+            LinearLayout tempLayout = new LinearLayout(listViewListener.getMainContext());
+            tempLayout.setOrientation(LinearLayout.HORIZONTAL);
+            tempLayout.setBackgroundColor(colors[i]);
+            tempLayout.setLayoutParams(lp);
+            for(int j=0;j<6;j++) {//每行孔数
+                final ImageButton tempBtn = new ImageButton(listViewListener.getMainContext());
+                tempBtn.setLayoutParams(lp);
+                tempBtn.setBackground(draw);
+                tempBtn.setTag(String.valueOf(number));
+                tempBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String tag = (String) tempBtn.getTag();
+                        if(showHoleChart.get(tag).equals("true")) {
+                            showHoleChart.put(tag, "false");
+                            tempBtn.setAlpha(0.5f);//不透明
+                        } else {
+                            showHoleChart.put(tag, "true");
+                            tempBtn.setAlpha(1.0f);
+                        }
+                        reDrawChart.reDrawChart();
+                    }
+                });
+                tempLayout.addView(tempBtn, j);
+                number++;//孔的标识符
+            }
+            holePart.addView(tempLayout, i);
+        }
+
     }
 
     public void setParas(Map<String, String> paras) {
@@ -131,60 +215,83 @@ public class GraphContentFragment extends Fragment {
         this.labData = labData;
     }
 
+    public void setShowHoleChart() {//初始化
+        if(showHoleChart.size() == 0) {
+            for(int i=1;i<=48;i++) {
+                showHoleChart.put(String.valueOf(i), "true");//默认显示所有孔曲线
+            }
+        }
+    }
+
     public void drawChart(int time) {//绘图
-        Map<String, List<String>> famResult = (Map<String, List<String>>) labData.get("FAM");
+        Map<String, List<String>> famResult = null;
+        Map<String, List<String>> hexResult = null;
+        if(chartType.get("fam_checkbox").equals("true")) {
+            famResult = (Map<String, List<String>>) labData.get("FAM");
+        }
+        if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
+            if(chartType.get("hex_checkbox").equals("true")) {//显示hex
+                hexResult = (Map<String, List<String>>) labData.get("HEX");
+            }
+        }
         List<Line> lines = new ArrayList<Line>();
-        for(int i=1;i<=24;i++) {
-            List<String> famTemp = famResult.get(String.valueOf(i));
-            List<PointValue> listVals = new ArrayList<PointValue>();
-            listVals.add(new PointValue(0, 0));//起点是原点
-            time = time >20?time:20;//确保每一个孔至少有20个数据
-            for(int j=0;j<time;j++) {
-                PointValue tempPoint = new PointValue();
-                tempPoint.set(j+1, Float.parseFloat(famTemp.get(j)));
-                listVals.add(tempPoint);
-            }
-            Line line = new Line(listVals);
-            if(i < 6) {
-                line.setColor(Color.RED);
-            } else if(i < 12) {
-                line.setColor(Color.YELLOW);
-            } else if(i < 18) {
-                line.setColor(Color.GREEN);
-            } else if(i < 24) {
-                line.setColor(R.color.aqua);
-            } else if(i < 30) {
-                line.setColor(Color.BLUE);
-            } else if(i < 36) {
-                line.setColor(R.color.magenta);
-            } else if(i < 42) {
-                line.setColor(R.color.purple);
+        for(int i=1;i<=48;i++) {//从1到48个孔
+            int num = (i-1)/6;
+            if(showHoleChart.get(String.valueOf(i)).equals("true")) {//该孔曲线显示
+                if(famResult != null) {
+                    Line line = new Line(getListVals(famResult, i, time));
+                    line.setColor(colors[num]);
+                    line.setCubic(true);
+                    lines.add(line);
+                }
+                if(hexResult != null) {
+                    Line line = new Line(getListVals(hexResult, i, time));
+                    line.setColor(colors[num]);
+                    line.setCubic(true);
+                    lines.add(line);
+                }
             } else {
-                line.setColor(R.color.godenrod);
+                continue;
             }
-            line.setCubic(true);
-            lines.add(line);
+
         }
         LineChartData data = new LineChartData();
         data.setLines(lines);
 
         Axis axisX = new Axis(); //X轴
-        axisX.setHasTiltedLabels(true);
+        //axisX.setHasTiltedLabels(true);
         axisX.setTextColor(Color.BLACK);
-        axisX.setName("扩增效率");
-        axisX.setMaxLabelChars(10);
+        //axisX.setName("扩增效率");
+        //axisX.setMaxLabelChars(10);
         data.setAxisXBottom(axisX);
 
         Axis axisY = new Axis();  //Y轴
-        axisY.setMaxLabelChars(10);
-        axisY.setHasTiltedLabels(true);
+        //axisY.setMaxLabelChars(10);
+        //axisY.setHasTiltedLabels(true);
         axisY.setTextColor(Color.BLACK);
-        axisY.setName("扩增倍数");
+        //axisY.setName("扩增倍数");
         data.setAxisYLeft(axisY);
         mainChart.setLineChartData(data);
         mainChart.setInteractive(true);
         mainChart.setZoomType(ZoomType.HORIZONTAL);
         mainChart.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
+    }
+
+    private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time) {
+        List<String> famTemp = result.get(String.valueOf(hole));
+        List<PointValue> listVals = new ArrayList<PointValue>();
+        listVals.add(new PointValue(0, 0));//起点是原点
+        if(time >= result.size()) {//运行时间最大不能超过采集到的数据总数
+            time = result.size();
+        } else {
+            time = time>20?time:20;//确保每一个孔至少有20个数据,测试数据
+        }
+        for(int j=0;j<time;j++) {
+            PointValue tempPoint = new PointValue();
+            tempPoint.set(j+1, Float.parseFloat(famTemp.get(j)));
+            listVals.add(tempPoint);
+        }
+        return listVals;
     }
 
     MyUtil mu = MyUtil.getInstance();
@@ -196,6 +303,15 @@ public class GraphContentFragment extends Fragment {
         mu.setRunbtnOnClickable(startRecordData, stopRecordData);
     }
 
+    public void setHexCheckboxTrue() {
+        hexCheckbox.setClickable(true);
+        hexCheckbox.setEnabled(true);
+    }
+
+    public void setHexCheckboxFalse() {
+        hexCheckbox.setClickable(false);
+        hexCheckbox.setEnabled(false);
+    }
 
     class MyAsyncTask extends AsyncTask<Void, Void, String> {//用来处理网络数据，获取网络数据
 
