@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.TransportPerformer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -145,7 +146,12 @@ public class ToolContentFragment extends Fragment {
                     }
                 });
             } else {
-                Toast.makeText(listViewListener.getMainContext(), "RD4800: local list files is null", Toast.LENGTH_SHORT).show();
+                localList = new ArrayList<FileItem>();
+                FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, localList);
+                localFiles.setAdapter(localAdapter);
+                TextView tip = new TextView(listViewListener.getMainContext(), null);
+                tip.setText("再怎么看也没有了");
+                localFiles.setEmptyView(tip);
             }
         }
     }
@@ -154,12 +160,14 @@ public class ToolContentFragment extends Fragment {
         if(sdCardPath != null) {
             List<FileItem> extList = directoryFiles(sdCardPath, image);
             if(extList == null || extList.size() == 0) {
-                Toast.makeText(listViewListener.getMainContext(), "RD4800: ext list files is null", Toast.LENGTH_SHORT).show();
+                extList = new ArrayList<FileItem>();
+                FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, extList);
+                localFiles.setAdapter(localAdapter);
+                TextView tip = new TextView(listViewListener.getMainContext(), null);
+                tip.setText("再怎么看也没有了");
+                outFiles.setEmptyView(tip);
                 return;
-            } else {
-                Toast.makeText(listViewListener.getMainContext(), String.valueOf(extList.size()), Toast.LENGTH_SHORT).show();
             }
-
             if(extList != null && extList.size() > 0) {
                 FileItemAdapter extAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, extList);
                 outFiles.setAdapter(extAdapter);

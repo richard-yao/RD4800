@@ -343,7 +343,7 @@ public class MyUtil {
                     this.deleteFile(files[i]); // 把每个文件 用这个方法进行迭代
                 }
             }
-            file.delete();
+            //file.delete();这个目录不用删除了
         }
     }
 
