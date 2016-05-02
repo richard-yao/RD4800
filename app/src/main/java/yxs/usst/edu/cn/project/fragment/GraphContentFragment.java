@@ -288,7 +288,7 @@ public class GraphContentFragment extends Fragment {
         }
         for(int j=0;j<time;j++) {
             PointValue tempPoint = new PointValue();
-            tempPoint.set(j+1, Float.parseFloat(famTemp.get(j)));
+            tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/60.0)), Float.parseFloat(famTemp.get(j)));
             listVals.add(tempPoint);
         }
         return listVals;

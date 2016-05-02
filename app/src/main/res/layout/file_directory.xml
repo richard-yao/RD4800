@@ -3,7 +3,8 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#f0f0f0">
+    android:background="#f0f0f0"
+    android:id="@+id/file_item_id">
 
     <ImageView
         android:id="@+id/filedialogitem_img"

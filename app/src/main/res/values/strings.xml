@@ -24,6 +24,11 @@
     <string name="result_dt">dt值</string>
     <string name="result_result">结果</string>
     <string name="result_remark">备注</string>
+    <string name="exportExcel">导出</string>
+    <string name="deleteExcel">删除</string>
+    <string name="clearExcel">清空</string>
+    <string name="sdCard">SD卡</string>
+    <string name="uPan">U盘</string>
     <string name="web_http">http://192.168.0.102:8080/RD4800</string>
     <string name="test_http">http://www.weather.com.cn/data/sk/101010100.html</string>
 </resources>

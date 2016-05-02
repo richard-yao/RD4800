@@ -27,6 +27,7 @@ import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.util.FragmentAdapter;
 import yxs.usst.edu.cn.project.util.MyUtil;
+import yxs.usst.edu.cn.project.util.RequestPermission;
 
 public class MainActivity extends FragmentActivity {
 
@@ -58,6 +59,7 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         findAllControlById();
         initFragmentView();
+        RequestPermission.verifyStoragePermissions(this);
     }
 
 
@@ -248,6 +250,12 @@ public class MainActivity extends FragmentActivity {
             }
         });
         mToolRg = new ToolContentFragment();
+        mToolRg.setListViewListener(new ListViewListener() {
+            @Override
+            public Context getMainContext() {
+                return getInstance();
+            }
+        });
         mFragmentList.add(mFileFg);
         mFragmentList.add(mSettingFg);
         mFragmentList.add(mGraphFg);
