@@ -183,62 +183,7 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:id="@+id/holePart">
-                        <!--<LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/first_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/second_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/third_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/fourth_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/fifth_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/sixth_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/seventh_line"
-                            android:layout_weight="1">
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/eighth_line"
-                            android:layout_weight="1">
-                        </LinearLayout>-->
+
                     </LinearLayout>
                 </LinearLayout>
 

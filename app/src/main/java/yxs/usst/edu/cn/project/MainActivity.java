@@ -25,6 +25,7 @@ import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
+import yxs.usst.edu.cn.project.util.DetailViewPager;
 import yxs.usst.edu.cn.project.util.FragmentAdapter;
 import yxs.usst.edu.cn.project.util.MyUtil;
 import yxs.usst.edu.cn.project.util.RequestPermission;
@@ -33,7 +34,7 @@ public class MainActivity extends FragmentActivity {
 
     private List<Fragment> mFragmentList = new ArrayList<Fragment>();//all fragment
     private FragmentAdapter mFragmentAdapter;
-    private ViewPager mViewPager;//id_fragment_content, show changed fragment content
+    private DetailViewPager mViewPager;//id_fragment_content, show changed fragment content
     Button fileFeature,settingFeature,graphFeature,resultFeature,toolFeature;
     private FileContentFragment mFileFg;
     private SettingContentFragment mSettingFg;
@@ -64,7 +65,7 @@ public class MainActivity extends FragmentActivity {
 
 
     private void findAllControlById() {
-        mViewPager = (ViewPager) this.findViewById(R.id.id_fragment_content);
+        mViewPager = (DetailViewPager) this.findViewById(R.id.id_fragment_content);
 
         fileFeature = (Button) this.findViewById(R.id.fileFeature);
         fileFeature.setOnClickListener(new View.OnClickListener() {
@@ -385,6 +386,20 @@ public class MainActivity extends FragmentActivity {
         showRunType.setText("停止");
         handler.removeCallbacks(runnable);
         runTime = 0;
+        printOutResult();
+    }
+
+    private void printOutResult() {//显示扩增实验结果
+        if(labData == null) {
+            return;
+        } else {
+            Map<String, List<String>> famResult = (Map<String, List<String>>) labData.get("FAM");
+
+
+        }
+
+
+
     }
 
 }

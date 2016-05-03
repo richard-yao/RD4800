@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
@@ -345,6 +346,45 @@ public class MyUtil {
             }
             //file.delete();这个目录不用删除了
         }
+    }
+
+    public double divideValue(double val1, double val2) {
+        BigDecimal v1 = new BigDecimal(Double.valueOf(val1));
+        BigDecimal v2 = new BigDecimal(Double.valueOf(val2));
+        return v1.divide(v2, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+
+    /**
+     *
+     * @param value 采集到的每个孔的连续数据
+     * @param type 数据类型，1是扩增，2是溶解
+     * @return
+     */
+    public List<Double> getDtValue(List<String> value, int type) {
+        List<Double> result = new ArrayList<Double>();
+        if(type == 1) {
+            double dx = 0.0;
+            double dy = 0.0;
+            double dval = 0.0;
+            for(int i=0;i<value.size();i++) {//每隔1分钟采集一次数据，所以dx始终为1
+                if(i <= value.size()-2) {
+                    dx = 1.0/60.0;
+                    dy = Double.parseDouble(value.get(i+1)) - Double.parseDouble(value.get(i));
+                    dval = divideValue(dy, dx);
+                    result.add(dval);
+                } else {
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public double getStandardDeviation(List<Double> dvalList) {//输入采集点的斜率值，求标准差
+
+
+        return 0;
     }
 
 }

@@ -242,12 +242,14 @@ public class GraphContentFragment extends Fragment {
                     Line line = new Line(getListVals(famResult, i, time));
                     line.setColor(colors[num]);
                     line.setCubic(true);
+                    line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
                 }
                 if(hexResult != null) {
                     Line line = new Line(getListVals(hexResult, i, time));
                     line.setColor(colors[num]);
                     line.setCubic(true);
+                    line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
                 }
             } else {
@@ -265,6 +267,7 @@ public class GraphContentFragment extends Fragment {
         //axisX.setMaxLabelChars(10);
         data.setAxisXBottom(axisX);
 
+
         Axis axisY = new Axis();  //Y轴
         //axisY.setMaxLabelChars(10);
         //axisY.setHasTiltedLabels(true);
@@ -277,14 +280,22 @@ public class GraphContentFragment extends Fragment {
         mainChart.setContainerScrollEnabled(true, ContainerScrollType.HORIZONTAL);
     }
 
+    /**
+     *
+     * @param result fam/hex统计到的数据
+     * @param hole 孔的位数，key
+     * @param time 已运行次数
+     * @return
+     */
     private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time) {
-        List<String> famTemp = result.get(String.valueOf(hole));
+        List<String> famTemp = result.get(String.valueOf(hole));//每个孔的数据总数
         List<PointValue> listVals = new ArrayList<PointValue>();
         listVals.add(new PointValue(0, 0));//起点是原点
-        if(time >= result.size()) {//运行时间最大不能超过采集到的数据总数
-            time = result.size();
-        } else {
-            time = time>20?time:20;//确保每一个孔至少有20个数据,测试数据
+        if(time < 20){//确保每一个孔至少有20个数据,测试数据
+            time = 20;
+        }
+        if(time >= famTemp.size()) {//运行时间最大不能超过采集到的数据总数
+            time = famTemp.size();
         }
         for(int j=0;j<time;j++) {
             PointValue tempPoint = new PointValue();
@@ -350,6 +361,7 @@ public class GraphContentFragment extends Fragment {
                     lines.add(line);
                     LineChartData data = new LineChartData();
                     data.setLines(lines);
+
 
                     Axis axisX = new Axis(); //X轴
                     axisX.setHasTiltedLabels(true);
