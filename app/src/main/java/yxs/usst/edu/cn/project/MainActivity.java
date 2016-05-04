@@ -281,6 +281,9 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onPageSelected(int position) {
                 resetTextView(position);
+                if(position == 3) {
+                    mResultFg.showResultData();
+                }
                 if(position == 4) {
                     mToolRg.showFilesList();//重新加载显示文件目录
                 }

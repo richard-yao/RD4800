@@ -60,7 +60,9 @@ public class ToolContentFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
         localPath = Environment.getExternalStorageDirectory().getPath()+"/" + appName;
-        sdCardPath = mu.getExtSdCardPath();
+        if(mu.getExtSdCardPath() != null) {
+            sdCardPath = mu.getExtSdCardPath() + "/" + appName;
+        }
         //sdCardPath = mu.getExtSdCardPath() + "/" + appName;
         bindControlBtnListener();
         showFilesList();
@@ -163,7 +165,7 @@ public class ToolContentFragment extends Fragment {
     }
 
     private void showExtFiles() {
-        if(sdCardPath != null) {
+        if(sdCardPath != null && !sdCardPath.equals("")) {
             List<FileItem> extList = directoryFiles(sdCardPath, image);
             if(extList == null || extList.size() == 0) {
                 extList = new ArrayList<FileItem>();

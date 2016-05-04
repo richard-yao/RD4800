@@ -429,7 +429,6 @@ public class MyUtil {
                     } else {
                         result.put("dt", String.valueOf(dt));
                     }
-
                 }
             }
         }
