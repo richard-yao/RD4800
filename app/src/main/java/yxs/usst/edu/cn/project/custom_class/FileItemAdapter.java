@@ -1,4 +1,4 @@
-package yxs.usst.edu.cn.project.util;
+package yxs.usst.edu.cn.project.custom_class;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,6 +12,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import yxs.usst.edu.cn.project.R;
+import yxs.usst.edu.cn.project.util.FileItem;
 
 /**
  * Created by Administrator on 2016/5/2.

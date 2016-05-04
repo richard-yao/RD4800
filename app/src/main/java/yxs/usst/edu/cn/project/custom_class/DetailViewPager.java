@@ -1,4 +1,4 @@
-package yxs.usst.edu.cn.project.util;
+package yxs.usst.edu.cn.project.custom_class;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;

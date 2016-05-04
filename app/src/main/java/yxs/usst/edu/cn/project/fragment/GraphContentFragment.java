@@ -290,7 +290,7 @@ public class GraphContentFragment extends Fragment {
     private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time) {
         List<String> famTemp = result.get(String.valueOf(hole));//每个孔的数据总数
         List<PointValue> listVals = new ArrayList<PointValue>();
-        listVals.add(new PointValue(0, 0));//起点是原点
+        //listVals.add(new PointValue(0, 0));//起点是原点,不需要起点
         if(time < 20){//确保每一个孔至少有20个数据,测试数据
             time = 20;
         }
@@ -299,7 +299,7 @@ public class GraphContentFragment extends Fragment {
         }
         for(int j=0;j<time;j++) {
             PointValue tempPoint = new PointValue();
-            tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/60.0)), Float.parseFloat(famTemp.get(j)));
+            tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/mu.hourTime)), Float.parseFloat(famTemp.get(j)));
             listVals.add(tempPoint);
         }
         return listVals;

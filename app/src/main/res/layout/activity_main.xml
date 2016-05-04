@@ -13,13 +13,13 @@
             android:id="@+id/id_fragment_title"
             layout="@layout/title_fragment" />
 
-        <yxs.usst.edu.cn.project.util.DetailViewPager
+        <yxs.usst.edu.cn.project.custom_class.DetailViewPager
             android:id="@+id/id_fragment_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1">
 
-        </yxs.usst.edu.cn.project.util.DetailViewPager>
+        </yxs.usst.edu.cn.project.custom_class.DetailViewPager>
         <!--<android.support.v4.view.ViewPager
             android:id="@+id/id_fragment_content"
             android:layout_width="match_parent"

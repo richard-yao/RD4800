@@ -96,4 +96,11 @@ public class ResultContentFragment extends Fragment {
         }
     }
 
+    public void clearResultData() {
+        resultData = new ArrayList<Map<String, Object>>();
+        SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(),resultData,
+                R.layout.result_list_item, items, itemId);
+        resultLv.setAdapter(simpleAdapter);
+    }
+
 }

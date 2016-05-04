@@ -13,11 +13,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import yxs.usst.edu.cn.project.fragment.FileContentFragment;
-import yxs.usst.edu.cn.project.fragment.FileDialogFragment;
+import yxs.usst.edu.cn.project.custom_class.FileDialogFragment;
 import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
 import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
 import yxs.usst.edu.cn.project.fragment.SettingContentFragment;
@@ -25,10 +25,10 @@ import yxs.usst.edu.cn.project.fragment.ToolContentFragment;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
-import yxs.usst.edu.cn.project.util.DetailViewPager;
-import yxs.usst.edu.cn.project.util.FragmentAdapter;
+import yxs.usst.edu.cn.project.custom_class.DetailViewPager;
+import yxs.usst.edu.cn.project.custom_class.FragmentAdapter;
 import yxs.usst.edu.cn.project.util.MyUtil;
-import yxs.usst.edu.cn.project.util.RequestPermission;
+import yxs.usst.edu.cn.project.device_permission.RequestPermission;
 
 public class MainActivity extends FragmentActivity {
 
@@ -190,7 +190,7 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mGraphFg.setStopbtnOnClickable();
                 startGetDataFromDb();
-                Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -198,7 +198,7 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mGraphFg.setRunbtnOnClickable();
                 stopGetDataFromDb();
-                Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
         });
         mGraphFg = new GraphContentFragment();
@@ -220,7 +220,7 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mSettingFg.setStopbtnOnClickable();
                 startGetDataFromDb();
-                Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -228,7 +228,7 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mSettingFg.setRunbtnOnClickable();
                 stopGetDataFromDb();
-                Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
         });
         mGraphFg.setReDrawChart(new GraphContentFragment.ReDrawChart() {
@@ -251,6 +251,7 @@ public class MainActivity extends FragmentActivity {
             }
         });
         mToolRg = new ToolContentFragment();
+        mToolRg.setAppName(getResources().getString(R.string.app_name));
         mToolRg.setListViewListener(new ListViewListener() {
             @Override
             public Context getMainContext() {
@@ -280,8 +281,8 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onPageSelected(int position) {
                 resetTextView(position);
-                if(position == 3) {
-                    mResultFg.showResultData();
+                if(position == 4) {
+                    mToolRg.showFilesList();//重新加载显示文件目录
                 }
             }
 
@@ -364,12 +365,18 @@ public class MainActivity extends FragmentActivity {
                 Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
                 if(runTime >= temp) {
                     stopGetDataFromDb();
+                    mSettingFg.setRunbtnOnClickable();//后台采集停止运行，按钮可以点击
+                    mGraphFg.setRunbtnOnClickable();
                 }
             }
         }
     };
 
     public void startGetDataFromDb() {//运行
+        if(excelData != null && excelData.size() > 0) {
+            excelData = new ArrayList<Map<String, Object>>();
+            mResultFg.clearResultData();//清除掉旧的实验结果
+        }
         showRunType.setText("运行");
         if(settingParas.get("default_temp_edit") != null) {
             showTempText.setText(settingParas.get("default_temp_edit")+"℃");
@@ -383,23 +390,49 @@ public class MainActivity extends FragmentActivity {
     }
 
     public void stopGetDataFromDb() {//停止
+        if(runTime == 0) {
+            return;
+        }
         showRunType.setText("停止");
         handler.removeCallbacks(runnable);
+        printOutResult(runTime);
+        mResultFg.showResultData();//显示实验结果
+        if(excelData != null) {
+            mu.createNewExcel(excelData, ResultContentFragment.items, mu.formatDate(), mToolRg.getLocalPath());//停止采集数据后自动保存result
+        }
         runTime = 0;
-        printOutResult();
     }
 
-    private void printOutResult() {//显示扩增实验结果
+    private void printOutResult(int runTime) {//显示扩增实验结果
         if(labData == null) {
             return;
         } else {
             Map<String, List<String>> famResult = (Map<String, List<String>>) labData.get("FAM");
-
-
+            List<Map<String, Object>> recordResult = new ArrayList<Map<String, Object>>();
+            String[] items = ResultContentFragment.items;
+            for(int i=0;i<famResult.size();i++) {
+                Map<String, Object> temp = new HashMap<String, Object>();
+                temp.put(items[0], i+1);//第一个是孔序号
+                Map<String, String> tempResult = mu.getChartResult(famResult.get(String.valueOf(i+1)), 1, runTime);
+                for(int j=1;j<items.length;j++) {
+                    if(j == 6) {//dt值
+                        temp.put(items[j], tempResult.get("dt"));
+                    } else if(j == 7) {//结果
+                        if(tempResult.get("result").equals("1")) {
+                            temp.put(items[j], getResources().getString(R.string.positiveVal));
+                        } else if(tempResult.get("result").equals("0")) {
+                            temp.put(items[j], getResources().getString(R.string.negativeVal));
+                        } else if(tempResult.get("result").equals("2")) {
+                            temp.put(items[j], "wrong!");
+                        }
+                    } else {
+                        temp.put(items[j], "null");
+                    }
+                }
+                recordResult.add(temp);
+            }
+            excelData = recordResult;
         }
-
-
-
     }
 
 }

@@ -1,4 +1,4 @@
-package yxs.usst.edu.cn.project.fragment;
+package yxs.usst.edu.cn.project.custom_class;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import yxs.usst.edu.cn.project.R;
+import yxs.usst.edu.cn.project.fragment.ResultContentFragment;
 import yxs.usst.edu.cn.project.interface_class.CallbackBundle;
 import yxs.usst.edu.cn.project.util.OpenFileDialog;
 

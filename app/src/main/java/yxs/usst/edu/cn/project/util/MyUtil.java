@@ -2,7 +2,6 @@ package yxs.usst.edu.cn.project.util;
 
 import android.graphics.Color;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.Button;
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +14,9 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,14 +27,14 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-import jxl.write.biff.RowsExceededException;
-import yxs.usst.edu.cn.project.R;
 
 /**
  * Created by Administrator on 2016/4/17.
  */
 public class MyUtil {
+
+    public static double dtTypeVal = 50.0;//根据线性拟合的斜率来区分阴阳性
+    public static double hourTime = 60.0;//采集点x时间转换为小时
 
     public static MyUtil myUtil = new MyUtil();
 
@@ -81,6 +82,12 @@ public class MyUtil {
     public String getTwoPointData(double input) {
         DecimalFormat df = new DecimalFormat("0.00");
         return df.format(input);
+    }
+
+    public String formatDate() {
+        Date date = new Date();
+        SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormater.format(date);
     }
 
     public List<Map<String, Object>> readExcel(String[] para, String fileName, String directory) {
@@ -225,7 +232,7 @@ public class MyUtil {
         int cols = sheet.getColumns();
         if (rows > 1) {//contain lab data
             for (int i = 1; i < rows; i++) {
-                String hole = sheet.getCell(0, i).getContents();//数量
+                String hole = sheet.getCell(0, i).getContents();//excel中第一列的值，也就是孔的序号
                 for (int j = 2; j < cols; j++) {
                     if (result.get(hole) != null) {
                         result.get(hole).add(sheet.getCell(j, i).getContents());
@@ -348,10 +355,30 @@ public class MyUtil {
         }
     }
 
-    public double divideValue(double val1, double val2) {
+    /**
+     *
+     * @param val1 被除数
+     * @param val2 除数
+     * @param valNum 小数点后保留位数
+     * @return
+     */
+    public double divideValue(double val1, double val2, int valNum) {
         BigDecimal v1 = new BigDecimal(Double.valueOf(val1));
         BigDecimal v2 = new BigDecimal(Double.valueOf(val2));
-        return v1.divide(v2, 2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return v1.divide(v2, valNum, BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    /**
+     *
+     * @param axisVal 输入y点的值
+     * @return 返回均值
+     */
+    public double getAverageValue(List<String> axisVal) {
+        double sum = 0.0;
+        for(int i=0;i<axisVal.size();i++) {
+            sum += Double.parseDouble(axisVal.get(i));
+        }
+        return divideValue(sum, axisVal.size(), 2);
     }
 
 
@@ -359,32 +386,137 @@ public class MyUtil {
      *
      * @param value 采集到的每个孔的连续数据
      * @param type 数据类型，1是扩增，2是溶解
-     * @return
+     * @return 斜率dt以及结果：0阴性 or 1阳性
      */
-    public List<Double> getDtValue(List<String> value, int type) {
-        List<Double> result = new ArrayList<Double>();
-        if(type == 1) {
-            double dx = 0.0;
-            double dy = 0.0;
-            double dval = 0.0;
-            for(int i=0;i<value.size();i++) {//每隔1分钟采集一次数据，所以dx始终为1
-                if(i <= value.size()-2) {
-                    dx = 1.0/60.0;
-                    dy = Double.parseDouble(value.get(i+1)) - Double.parseDouble(value.get(i));
-                    dval = divideValue(dy, dx);
-                    result.add(dval);
-                } else {
-                    break;
+    public Map<String, String> getChartResult(List<String> value, int type, int time) {
+        if(time < 20){//确保每一个孔至少有20个数据,测试数据
+            time = 20;
+        }
+        if(time >= value.size()) {//运行时间最大不能超过采集到的数据总数
+            time = value.size();
+        }
+        value = value.subList(0, time);
+        Map<String, String> result = new HashMap<String, String>();
+        if(value != null && value.size() > 0) {
+            if(type == 1) {
+                int size = value.size();
+                double aveX = divideValue(Double.valueOf(size+1), 2.0, 2);//x轴连续整数相加求平均(n+1)/2
+                double aveY = getAverageValue(value);
+                /*double r = getCorrelationValue(value, size, aveX, aveY);
+                if(r < 0.5) {//线性不相关，是有波峰的曲线
+                    result.put("result", "1");
+                    result.put("dt", String.valueOf(getDtValue(value, size, aveX, aveY)));//预先模拟dt值为1
+                } else {//线性相关，阳性
+                    result.put("result", "0");
+                    result.put("dt", String.valueOf(getDtValue(value, size, aveX, aveY)));
+                }*/
+                double dt = 0;
+                try {
+                    dt = getDtValue(value, size, aveX, aveY);
+                } catch (Exception e) {//除数为0
+                    e.printStackTrace();
+                    result.put("result", "2");
+                    result.put("dt", "wrong!");
+                }
+                if(dt < dtTypeVal*hourTime) {//如果是阴性的，基于实验数据，dt值不可能大于20，这里默认最大为50,乘以时间60
+                    result.put("result", "0");
+                    result.put("dt", String.valueOf(dt));
+                } else {//阳性，有波峰
+                    result.put("result", "1");
+                    double temp = countAmplificationDt(value, divideValue(dt, hourTime, 2));
+                    if(temp != -1.0) {
+                        result.put("dt", String.valueOf(temp));
+                    } else {
+                        result.put("dt", String.valueOf(dt));
+                    }
+
                 }
             }
         }
         return result;
     }
 
-    public double getStandardDeviation(List<Double> dvalList) {//输入采集点的斜率值，求标准差
-
-
-        return 0;
+    /**
+     *
+     * @param value 扩增采集到的数据,默认从1开始计算
+     * @return 线性相关系数，0到1之间,,这个线性相关系数似乎没用了，即便趋势是直线，然而如果误差很大还是不准
+     */
+    public Double getCorrelationValue(List<String> value, int size, double aveX, double aveY) {
+        double numerator = 0.0;//分子
+        double xDeno = 0.0;
+        double yDeno = 0.0;
+        for(int i=0;i<size;i++) {
+            numerator += ((i+1) - aveX)*(Double.parseDouble(value.get(i)) - aveY);
+            xDeno += Math.pow((i+1)-aveX, 2);
+            yDeno += Math.pow((Double.parseDouble(value.get(i)) - aveY), 2);
+        }
+        double denominator = Math.sqrt(xDeno) * Math.sqrt(yDeno);//分母
+        return Math.abs(divideValue(numerator, denominator, 2));
     }
+
+
+    /**
+     *
+     * @param value 扩增采集到的数据
+     * @return 线性系数dt
+     */
+    public Double getDtValue(List<String> value, int size, double aveX, double aveY) {//注意这里需要将x轴的值转为小时值，所以换算后需要将结果乘以60
+        double numerator = 0.0;
+        double xDeno = 0.0;
+        for(int i=0;i<size;i++) {
+            numerator += (i+1)*Double.parseDouble(value.get(i));
+            xDeno += Math.pow((i+1), 2);
+        }
+        numerator = numerator - size * aveX * aveY;
+        double denominator = xDeno - size * Math.pow(aveX, 2);
+        numerator = numerator * hourTime;
+        return divideValue(numerator, denominator, 2);
+    }
+
+    /**
+     *
+     * @param value 扩增采集到的数据点
+     * @return 真正扩增曲线的dt值
+     */
+    public Double countAmplificationDt(List<String> value, double curveDt) {
+        List<Double> dyList = new ArrayList<Double>();
+        List<Double> resultList = new ArrayList<Double>();
+        double temp = 0.0;
+        for(int i=0;i<value.size()-1;i++) {
+            temp = Double.parseDouble(value.get(i+1)) - Double.parseDouble(value.get(i));//两点之间的差值
+            dyList.add(temp);
+        }
+        for(int i=0;i<dyList.size()-1;i++) {//根据实验结果，前五分钟一般不会有明显变化
+            if(dyList.get(i) > curveDt && dyList.get(i+1) > curveDt) {//连续两个点斜率大于拟合拟合直线的斜率
+                resultList.add(dyList.get(i));
+                continue;
+            }
+            if(dyList.get(i) > curveDt && dyList.get(i+1) < curveDt) {//曲线开始平稳乃至下降
+                if(resultList.size() >= 1) {
+                    resultList.add(dyList.get(i));
+                    break;
+                } else {
+                    continue;
+                }
+            }
+        }
+        if(resultList.size() == 0) {//未找到比拟合直线斜率大的
+            return -1.0;
+        } else {
+            return maxValue(resultList);
+        }
+    }
+
+    public Double maxValue(List<Double> inputList) {
+        double temp = 0;
+        if(inputList != null && inputList.size() > 1) {
+            temp = inputList.get(0);
+            for(int i=1;i<inputList.size();i++) {
+                temp = temp>inputList.get(i)?temp:inputList.get(i);
+            }
+        }
+        return temp;
+    }
+
 
 }
