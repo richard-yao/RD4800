@@ -47,6 +47,7 @@ public class SettingContentFragment extends Fragment {
     }
 
     private Map<String, String> paras = new HashMap<String, String>();
+    MyUtil mu = MyUtil.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
@@ -348,7 +349,6 @@ public class SettingContentFragment extends Fragment {
         }
     }
 
-    MyUtil mu = MyUtil.getInstance();
     public void setStopbtnOnClickable() {
         mu.setStopbtnOnClickable(startRecordData, stopRecordData);
     }

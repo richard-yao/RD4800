@@ -5,9 +5,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -51,13 +54,19 @@ public class MainActivity extends FragmentActivity {
     public static String[] settingParasName = {"hex_graph_choice","default_temp_choice","dissolution_graph_choice","stop_dissolution_temp_choice","default_count_temp_choice",
             "default_temp_edit","default_keeptime_edit","dissolution_tempnum_edit","change_stoptemp_edit","change_counttemp_edit","run"};
     private Map<String, Object> labData;//扩增曲线数据
-    private static int refreshTime = 60*1000;
+    private Map<String, Object> dissolutionData;//溶解曲线数据
+    private static int refreshTime = 60*1000;//设定扩增扫描时间1分钟
+    private static boolean ampFlag = false;
+    private static int temperatureTime = 80*1000;//设定溶解温度变化一度时间是80s
+    private static boolean disFlag = false;
     private int runTime = 0;
+    private int disTimes = 0;
     private String newLabName = "";//实验名称，新建时生成
 
     private TextView showTempText,showRunType;
     MyUtil mu = MyUtil.getInstance();
-    Handler handler = new Handler();
+    AmpTaskThread ampTaskThread = new AmpTaskThread();
+    DisTaskThread disTaskThread = new DisTaskThread();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,6 +232,12 @@ public class MainActivity extends FragmentActivity {
                 //mGraphFg.setRunbtnOnClickable();
                 mGraphFg.setStopRecordBtn();
                 mSettingFg.setAllContentClickable();
+                if(settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
+                    ampFlag = true;
+                    disFlag = true;
+                } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
+                    ampFlag = true;
+                }
                 stopGetDataFromDb();
                 //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
@@ -255,14 +270,25 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mSettingFg.setRunbtnOnClickable();
                 mSettingFg.setAllContentClickable();
+                if(settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
+                    ampFlag = true;
+                    disFlag = true;
+                } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
+                    ampFlag = true;
+                }
                 stopGetDataFromDb();
                 //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
         });
         mGraphFg.setReDrawChart(new GraphContentFragment.ReDrawChart() {
             @Override
-            public void reDrawChart() {
-                mGraphFg.drawChart(runTime);//重新绘制图形
+            public void reDrawChart(int type) {
+                if(type == 1) {
+                    mGraphFg.drawChart(runTime);//重新绘制扩增图形
+                } else if(type == 2) {
+                    mGraphFg.drawChart(disTimes);//重新绘制溶解图形
+                }
+
             }
         });
         mResultFg = new ResultContentFragment();
@@ -377,29 +403,140 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    Runnable runnable = new Runnable() {
+
+    private Handler handler = new Handler() {
+        protected void handlerMessage(Message msg){
+            switch (msg.what) {
+                case 2:Toast.makeText(getInstance(), "Get data from dis excel", Toast.LENGTH_SHORT).show();break;
+                case 1:Toast.makeText(getInstance(), "Get data from amp excel", Toast.LENGTH_SHORT).show();break;
+            }
+        }
+    };
+
+    public class AmpTaskThread implements Runnable {
+        public volatile boolean stop = false;
+
         @Override
         public void run() {
+            Looper.prepare();
+            if(settingParas == null) {
+                return;
+            }
+            Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
+            while(!stop && runTime < temp) {
+                runTime++;
+                if(settingParas.get("hex_graph_choice").equals("true")) {
+                    labData = mu.getLabDataFromPhone(2, 1);
+                } else {
+                    labData = mu.getLabDataFromPhone(1, 1);
+                }
+                mGraphFg.setLabData(labData);
+                mGraphFg.drawChart(runTime);
+                Message msg = handler.obtainMessage();
+                msg.what = 1;
+                msg.sendToTarget();
+                //handler.postDelayed(this, refreshTime);
+                try {
+                    Thread.sleep(refreshTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            ampFlag = true;
+            stopGetDataFromDb();
+            Message msg = handler.obtainMessage();
+            msg.sendToTarget();
+            Looper.loop();
+        }
+    }
+
+    public class DisTaskThread implements Runnable {
+        public volatile boolean stop = false;
+        @Override
+        public void run() {
+            Looper.prepare();
+            if(settingParas == null) {
+                return;
+            }
+            Integer tempCount = Integer.parseInt(settingParas.get("change_counttemp_edit"));//度数误差
+            Double tempGap = Double.parseDouble(settingParas.get("change_stoptemp_edit"))- Double.parseDouble(settingParas.get("dissolution_tempnum_edit"));
+            while(!stop && disTimes < mu.divideValue(tempGap, tempCount, 0)) {
+                disTimes++;
+                if(settingParas.get("dissolution_graph_choice").equals("true")) {//采集溶解曲线数据
+                    if (settingParas.get("hex_graph_choice").equals("true")) {
+                        dissolutionData = mu.getLabDataFromPhone(2, 2);
+                    } else {
+                        dissolutionData = mu.getLabDataFromPhone(1, 2);
+                    }
+                    mGraphFg.setDissolutionData(dissolutionData);
+                    mGraphFg.drawChart(disTimes);
+                    if (settingParas != null && settingParas.size() > 0) {
+                        Message msg = handler.obtainMessage();
+                        msg.what = 2;
+                        msg.sendToTarget();
+                    }
+                    try {
+                        Thread.sleep(temperatureTime * tempCount);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            disFlag = true;
+            stopGetDataFromDb();
+            Message msg = handler.obtainMessage();
+            msg.sendToTarget();
+            Looper.loop();
+        }
+    }
+
+    /*Runnable runnable = new Runnable() {
+        @Override
+        public void run() {//采集恒温扩增数据
             runTime++;
             if(settingParas.get("hex_graph_choice").equals("true")) {
-                labData = mu.getLabDataFromPhone(2);
+                labData = mu.getLabDataFromPhone(2, 1);
             } else {
-                labData = mu.getLabDataFromPhone(1);
+                labData = mu.getLabDataFromPhone(1, 1);
             }
             mGraphFg.setLabData(labData);
             mGraphFg.drawChart(runTime);
             handler.postDelayed(this, refreshTime);
-            Toast.makeText(getInstance(), "Get data from excel", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getInstance(), "Get data from amp excel", Toast.LENGTH_SHORT).show();
             if(settingParas != null) {
                 Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
                 if(runTime >= temp) {
+                    ampFlag = true;
                     stopGetDataFromDb();
-                    mSettingFg.setRunbtnOnClickable();//后台采集停止运行，按钮可以点击
-                    mGraphFg.setRunbtnOnClickable();
                 }
             }
         }
-    };
+    };*/
+    /*Runnable disRunnale = new Runnable() {//采集溶解曲线数据
+        @Override
+        public void run() {
+            disTimes++;
+            if(settingParas.get("dissolution_graph_choice").equals("true")) {//采集溶解曲线数据
+                if(settingParas.get("hex_graph_choice").equals("true")) {
+                    dissolutionData = mu.getLabDataFromPhone(2, 2);
+                } else {
+                    dissolutionData = mu.getLabDataFromPhone(1, 2);
+                }
+                mGraphFg.setDissolutionData(dissolutionData);
+                mGraphFg.drawChart(disTimes);
+                if(settingParas != null && settingParas.size() > 0) {
+                    Toast.makeText(getInstance(), "Get data from dis excel", Toast.LENGTH_SHORT).show();
+                    Integer tempCount = Integer.parseInt(settingParas.get("change_counttemp_edit"));//度数误差
+                    handler.postDelayed(this, temperatureTime * tempCount);//执行一次采集数据的时间
+                    Double tempGap = Double.parseDouble(settingParas.get("change_stoptemp_edit"))- Double.parseDouble(settingParas.get("dissolution_tempnum_edit"));
+                    if(disTimes >= mu.divideValue(tempGap, tempCount, 0)) {
+                        disFlag = true;
+                        stopGetDataFromDb();
+                    }
+                }
+            }
+        }
+    };*/
 
     public void startGetDataFromDb() {//运行
         if(excelData != null && excelData.size() > 0) {
@@ -415,27 +552,55 @@ public class MainActivity extends FragmentActivity {
         } else if(settingParas.get("hex_graph_choice").equals("true")) {
             mGraphFg.setHexCheckboxTrue();
         }
-        handler.post(runnable);
+        //handler.post(runnable);
+        new Thread(ampTaskThread).start();
+        if(settingParas.get("dissolution_graph_choice").equals("true")) {
+            //handler.post(disRunnale);
+            new Thread(disTaskThread).start();
+        }
     }
 
     public void stopGetDataFromDb() {//停止
         if(runTime == 0) {
             return;
         }
-        showRunType.setText("停止");
-        handler.removeCallbacks(runnable);
-        printOutResult(runTime);
-        mResultFg.showResultData();//显示实验结果
-        if(excelData != null) {
-            String fileName = "";
-            if(newLabName.equals("")) {//没有新建excel
-                fileName = mu.formatDate();
-            } else {//新建excel作为实验结果文件名
-                fileName = newLabName;
+        boolean flag = false;
+        if(settingParas.get("dissolution_graph_choice").equals("true")) {
+            if(ampFlag && disFlag) {
+                flag = true;
             }
-            mu.createNewExcel(excelData, ResultContentFragment.items, fileName, DevicePath.getInstance().getLocalPath());//停止采集数据后自动保存result
+        } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
+            if(ampFlag) {
+                flag = true;
+            }
         }
-        runTime = 0;
+        if(flag) {
+            mSettingFg.setRunbtnOnClickable();//后台采集停止运行，运行按钮可以点击
+            mGraphFg.setRunbtnOnClickable();
+            showRunType.setText("停止");
+            ampTaskThread.stop = true;
+            //handler.removeCallbacks(runnable);
+            ampFlag = false;
+            if(settingParas.get("dissolution_graph_choice").equals("true")) {
+                //handler.removeCallbacks(disRunnale);
+                disTaskThread.stop = true;
+                disTimes = 0;
+                disFlag = false;
+            }
+            printOutResult(runTime);
+            mResultFg.showResultData();//显示实验结果
+            if(excelData != null) {
+                String fileName = "";
+                if(newLabName.equals("")) {//没有新建excel
+                    fileName = mu.formatDate();
+                } else {//新建excel作为实验结果文件名
+                    fileName = newLabName;
+                }
+                mu.createNewExcel(excelData, ResultContentFragment.items, fileName, DevicePath.getInstance().getLocalPath());//停止采集数据后自动保存result
+            }
+            runTime = 0;
+        }
+
     }
 
     private void printOutResult(int runTime) {//显示扩增实验结果

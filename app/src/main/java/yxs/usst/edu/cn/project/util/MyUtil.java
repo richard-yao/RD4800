@@ -214,18 +214,25 @@ public class MyUtil {
     /**
      *
      * @param type 1是单通道，2是双通道
+     * @param chartType 1是恒温扩增曲线，2是溶解曲线
      * @return 读取到的扩增曲线的数据
      */
-    public Map<String, Object> getLabDataFromPhone(int type) {
+    public Map<String, Object> getLabDataFromPhone(int type, int chartType) {
         Map<String, Object> result = new HashMap<String, Object>();
         Map<String, List<String>> famResult = new HashMap<String, List<String>>();
         Map<String, List<String>> hexResult = new HashMap<String, List<String>>();
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
             try {
-                File files = new File(DevicePath.getInstance().getAmpDataPath());
+                String directory = "";
+                if(chartType == 1) {
+                    directory = DevicePath.getInstance().getAmpDataPath();//扩增数据目录
+                } else if(chartType == 2) {
+                    directory = DevicePath.getInstance().getDissolutionPath();//溶解数据目录
+                }
+                File files = new File(directory);
                 File[] listFiles = files.listFiles();
                 if(listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
-                    String dataFile = DevicePath.getInstance().getAmpDataPath() + "/" +listFiles[0].getName();
+                    String dataFile = directory + "/" +listFiles[0].getName();
                     InputStream is = new FileInputStream(dataFile);
                     WorkbookSettings workbookSettings = new WorkbookSettings();
                     workbookSettings.setGCDisabled(true);
@@ -247,7 +254,6 @@ public class MyUtil {
                         is.close();
                     }
                 }
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -277,36 +283,6 @@ public class MyUtil {
                         result.put(hole, tempList);
                     }
                 }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 获得溶解曲线采集点的数据
-     * @return
-     */
-    public Map<String, Object> getDissolutionData() {
-        Map<String, Object> result = new HashMap<String, Object>();
-        Map<String, List<String>> disResult = new HashMap<String, List<String>>();
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
-            try {
-                File files = new File(DevicePath.getInstance().getDissolutionPath());
-                File[] listFiles = files.listFiles();
-                if (listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
-                    String dataFile = DevicePath.getInstance().getAmpDataPath() + "/" + listFiles[0].getName();
-                    InputStream is = new FileInputStream(dataFile);
-                    WorkbookSettings workbookSettings = new WorkbookSettings();
-                    workbookSettings.setGCDisabled(true);
-                    Workbook book = Workbook.getWorkbook(is, workbookSettings);
-                    Sheet disSheet = book.getSheet(0);
-                    disResult = getSheetData(disSheet);
-                    result.put("Dissolution", disResult);
-                    book.close();
-                    is.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
         return result;

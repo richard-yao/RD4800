@@ -49,7 +49,8 @@ public class GraphContentFragment extends Fragment {
     private LinearLayout holePart;
     private CheckBox famCheckbox, hexCheckbox;
     private Map<String, String> paras = new HashMap<String, String>();//设置页面所有运行参数
-    private Map<String, Object> labData = null;//采集的实验数据
+    private Map<String, Object> labData = null;//采集的扩增实验数据
+    private Map<String, Object> dissolutionData = null;//采集的溶解实验数据
     private Map<String, String> showHoleChart = new HashMap<String, String>();//所有孔的显示状况
     private Map<String, String> chartType = new HashMap<String, String>();// FAM/HEX显示情况
     private Map<String, String> dissolutionType = new HashMap<String, String>();//溶解或者扩增曲线显示
@@ -66,7 +67,7 @@ public class GraphContentFragment extends Fragment {
     }
 
     public interface ReDrawChart {
-        public void reDrawChart();
+        public void reDrawChart(int type);
     }
 
     public ReDrawChart reDrawChart;
@@ -126,14 +127,14 @@ public class GraphContentFragment extends Fragment {
                     if(increaseBtn.getTag().equals("false")) {//未选中
                         setAmpButtonStyle(true);
                         setDisButtonStyle(false);//扩增和溶解，只能同时显示一个
-                    } else if(increaseBtn.getTag().equals("true")) {
+                    } /*else if(increaseBtn.getTag().equals("true")) {
                         if(paras.get("dissolution_graph_choice").equals("false")) {//若溶解曲线未做，则无法取消显示扩增曲线
                             return;
                         }
                         setAmpButtonStyle(false);
                         setDisButtonStyle(true);
-                    }
-                    reDrawChart.reDrawChart();
+                    }*/
+                    reDrawChart.reDrawChart(1);//绘制扩增曲线
                 }
             }
         });
@@ -148,11 +149,11 @@ public class GraphContentFragment extends Fragment {
                     if(decreaseBtn.getTag().equals("false")) {//未选中
                         setDisButtonStyle(true);
                         setAmpButtonStyle(false);//扩增和溶解，只能同时显示一个
-                    } else if(decreaseBtn.getTag().equals("true")) {
+                    } /*else if(decreaseBtn.getTag().equals("true")) {
                         setDisButtonStyle(false);
                         setAmpButtonStyle(true);
-                    }
-                    reDrawChart.reDrawChart();
+                    }*/
+                    reDrawChart.reDrawChart(2);//绘制溶解曲线
                 }
             }
         });
@@ -192,7 +193,12 @@ public class GraphContentFragment extends Fragment {
                 } else {
                     chartType.put("fam_checkbox", "false");
                 }
-                reDrawChart.reDrawChart();
+                if(increaseBtn.getTag().equals("true")) {//扩增曲线
+                    reDrawChart.reDrawChart(1);
+                } else {
+                    reDrawChart.reDrawChart(2);
+                }
+
             }
         });
         hexCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -203,7 +209,11 @@ public class GraphContentFragment extends Fragment {
                 } else {
                     chartType.put("hex_checkbox", "false");
                 }
-                reDrawChart.reDrawChart();
+                if(increaseBtn.getTag().equals("true")) {//扩增曲线
+                    reDrawChart.reDrawChart(1);
+                } else {
+                    reDrawChart.reDrawChart(2);
+                }
             }
         });
     }
@@ -234,7 +244,11 @@ public class GraphContentFragment extends Fragment {
                             showHoleChart.put(tag, "true");
                             tempBtn.setAlpha(1.0f);
                         }
-                        reDrawChart.reDrawChart();
+                        if(increaseBtn.getTag().equals("true")) {
+                            reDrawChart.reDrawChart(1);
+                        } else {
+                            reDrawChart.reDrawChart(2);
+                        }
                     }
                 });
                 tempLayout.addView(tempBtn, j);
@@ -253,6 +267,10 @@ public class GraphContentFragment extends Fragment {
         this.labData = labData;
     }
 
+    public void setDissolutionData(Map<String, Object> dissolutionData) {
+        this.dissolutionData = dissolutionData;
+    }
+
     public void setShowHoleChart() {//初始化
         if(showHoleChart.size() == 0) {
             for(int i=1;i<=48;i++) {
@@ -261,15 +279,36 @@ public class GraphContentFragment extends Fragment {
         }
     }
 
-    public void drawChart(int time) {//绘图
+    /**
+     *
+     * @param time 运行次数，即绘制出来的点数
+     */
+    public void drawChart(int time) {
         Map<String, List<String>> famResult = null;
         Map<String, List<String>> hexResult = null;
-        if(chartType.get("fam_checkbox").equals("true")) {
-            famResult = (Map<String, List<String>>) labData.get("FAM");
+        int type = 0;
+        if(dissolutionType.get("amp_btn").equals("true")) {
+            type = 1;
+        } else if(dissolutionType.get("dis_btn").equals("true")) {
+            type = 2;
         }
-        if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
-            if(chartType.get("hex_checkbox").equals("true")) {//显示hex
-                hexResult = (Map<String, List<String>>) labData.get("HEX");
+        if(type == 1) {
+            if(chartType.get("fam_checkbox").equals("true")) {
+                famResult = (Map<String, List<String>>) labData.get("FAM");
+            }
+            if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
+                if(chartType.get("hex_checkbox").equals("true")) {//显示hex
+                    hexResult = (Map<String, List<String>>) labData.get("HEX");
+                }
+            }
+        } else if(type == 2) {
+            if(chartType.get("fam_checkbox").equals("true")) {
+                famResult = (Map<String, List<String>>) dissolutionData.get("FAM");
+            }
+            if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
+                if(chartType.get("hex_checkbox").equals("true")) {//显示hex
+                    hexResult = (Map<String, List<String>>) dissolutionData.get("HEX");
+                }
             }
         }
         List<Line> lines = new ArrayList<Line>();
@@ -277,14 +316,14 @@ public class GraphContentFragment extends Fragment {
             int num = (i-1)/6;
             if(showHoleChart.get(String.valueOf(i)).equals("true")) {//该孔曲线显示
                 if(famResult != null) {
-                    Line line = new Line(getListVals(famResult, i, time));
+                    Line line = new Line(getListVals(famResult, i, time, type));
                     line.setColor(colors[num]);
                     line.setCubic(true);
                     line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
                 }
                 if(hexResult != null) {
-                    Line line = new Line(getListVals(hexResult, i, time));
+                    Line line = new Line(getListVals(hexResult, i, time, type));
                     line.setColor(colors[num]);
                     line.setCubic(true);
                     line.setHasLabelsOnlyForSelected(true);
@@ -325,7 +364,7 @@ public class GraphContentFragment extends Fragment {
      * @param time 已运行次数
      * @return
      */
-    private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time) {
+    private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time, int type) {
         List<String> famTemp = result.get(String.valueOf(hole));//每个孔的数据总数
         List<PointValue> listVals = new ArrayList<PointValue>();
         //listVals.add(new PointValue(0, 0));//起点是原点,不需要起点
@@ -335,9 +374,20 @@ public class GraphContentFragment extends Fragment {
         if(time >= famTemp.size()) {//运行时间最大不能超过采集到的数据总数
             time = famTemp.size();
         }
+        if(type == 1) {
+            listVals.add(new PointValue(0, 0));//扩增起始值为0分
+        } else if(type == 2) {
+            listVals.add(new PointValue(Float.parseFloat(paras.get("dissolution_tempnum_edit")), 0));//溶解起始值为起始温度
+        }
         for(int j=0;j<time;j++) {
             PointValue tempPoint = new PointValue();
-            tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/mu.hourTime)), Float.parseFloat(famTemp.get(j)));
+            if(type == 1){
+                tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/mu.hourTime)), Float.parseFloat(famTemp.get(j)));
+            } else if(type == 2) {
+                double temp = Double.parseDouble(paras.get("dissolution_tempnum_edit")) + (j+1)*Double.parseDouble(paras.get("change_counttemp_edit"));//每一个点的温度值
+                tempPoint.set((float) temp, Float.parseFloat(famTemp.get(j)));
+            }
+
             listVals.add(tempPoint);
         }
         return listVals;
