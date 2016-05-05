@@ -210,7 +210,9 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void getDataFromDb(Map<String, String> paras) {
                 settingParas = paras;
-                mGraphFg.setStopbtnOnClickable();
+                //mGraphFg.setStopbtnOnClickable();
+                mGraphFg.setRunRecordBtn();
+                mSettingFg.setAllContentReadOnly();
                 startGetDataFromDb();
                 //Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
             }
@@ -218,7 +220,9 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void stopGetData(Map<String, String> paras) {
                 settingParas = paras;
-                mGraphFg.setRunbtnOnClickable();
+                //mGraphFg.setRunbtnOnClickable();
+                mGraphFg.setStopRecordBtn();
+                mSettingFg.setAllContentClickable();
                 stopGetDataFromDb();
                 //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }
@@ -241,6 +245,7 @@ public class MainActivity extends FragmentActivity {
             public void getDataFromDb(Map<String, String> paras) {
                 settingParas = paras;
                 mSettingFg.setStopbtnOnClickable();
+                mSettingFg.setAllContentReadOnly();
                 startGetDataFromDb();
                 //Toast.makeText(getInstance(), "get data from db", Toast.LENGTH_SHORT).show();
             }
@@ -249,6 +254,7 @@ public class MainActivity extends FragmentActivity {
             public void stopGetData(Map<String, String> paras) {
                 settingParas = paras;
                 mSettingFg.setRunbtnOnClickable();
+                mSettingFg.setAllContentClickable();
                 stopGetDataFromDb();
                 //Toast.makeText(getInstance(), "stop get data", Toast.LENGTH_SHORT).show();
             }

@@ -4,38 +4,39 @@
             android:layout_height="match_parent"
             android:background="@color/backColor">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="right"
-                android:layout_marginTop="5dp"
-                android:baselineAligned="false">
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="@string/runBtn"
-                    android:background="@drawable/btn_style"
-                    android:id="@+id/startRecordData"
-                    android:layout_marginRight="10dp"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="30dp"
-                    android:text="@string/stopBtn"
-                    android:background="@drawable/btn_style"
-                    android:id="@+id/stopRecordData"
-                    android:layout_marginRight="10dp"
-                    android:clickable="false"
-                    android:textColor="@color/cannotClick"/>
-
-            </LinearLayout>
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right"
+            android:layout_marginTop="5dp"
+            android:baselineAligned="false">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/runBtn"
+                android:background="@drawable/btn_style"
+                android:id="@+id/startRecordData"
+                android:layout_marginRight="10dp"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/stopBtn"
+                android:background="@drawable/btn_style"
+                android:id="@+id/stopRecordData"
+                android:layout_marginRight="10dp"
+                android:clickable="false"
+                android:textColor="@color/cannotClick"/>
+
+        </LinearLayout>
+        <yxs.usst.edu.cn.project.custom_class.ChildClickableLinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:layout_marginTop="5dp">
+            android:layout_marginTop="5dp"
+            android:id="@+id/allSettingContent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -286,44 +287,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-        </LinearLayout>
+        </yxs.usst.edu.cn.project.custom_class.ChildClickableLinearLayout>
 
-        <!--<LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="15dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="30dp"
-            android:paddingRight="15dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="温度模块："
-                />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="42.0℃"
-                android:id="@+id/showTempText"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="运行状态："/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="停止"
-                android:id="@+id/showRunType"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-            </LinearLayout>
-        </LinearLayout>-->
 </LinearLayout>

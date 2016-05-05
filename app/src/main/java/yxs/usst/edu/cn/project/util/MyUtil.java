@@ -224,7 +224,7 @@ public class MyUtil {
             try {
                 File files = new File(DevicePath.getInstance().getAmpDataPath());
                 File[] listFiles = files.listFiles();
-                if(listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {
+                if(listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
                     String dataFile = DevicePath.getInstance().getAmpDataPath() + "/" +listFiles[0].getName();
                     InputStream is = new FileInputStream(dataFile);
                     WorkbookSettings workbookSettings = new WorkbookSettings();
@@ -256,6 +256,11 @@ public class MyUtil {
         return result;
     }
 
+    /**
+     *
+     * @param sheet 输入excel的工作表
+     * @return 以孔为key，每行所有数据为value的map
+     */
     public Map<String, List<String>> getSheetData(Sheet sheet) {
         Map<String, List<String>> result = new HashMap<String, List<String>>();
         int rows = sheet.getRows();
@@ -272,6 +277,36 @@ public class MyUtil {
                         result.put(hole, tempList);
                     }
                 }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获得溶解曲线采集点的数据
+     * @return
+     */
+    public Map<String, Object> getDissolutionData() {
+        Map<String, Object> result = new HashMap<String, Object>();
+        Map<String, List<String>> disResult = new HashMap<String, List<String>>();
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
+            try {
+                File files = new File(DevicePath.getInstance().getDissolutionPath());
+                File[] listFiles = files.listFiles();
+                if (listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
+                    String dataFile = DevicePath.getInstance().getAmpDataPath() + "/" + listFiles[0].getName();
+                    InputStream is = new FileInputStream(dataFile);
+                    WorkbookSettings workbookSettings = new WorkbookSettings();
+                    workbookSettings.setGCDisabled(true);
+                    Workbook book = Workbook.getWorkbook(is, workbookSettings);
+                    Sheet disSheet = book.getSheet(0);
+                    disResult = getSheetData(disSheet);
+                    result.put("Dissolution", disResult);
+                    book.close();
+                    is.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return result;

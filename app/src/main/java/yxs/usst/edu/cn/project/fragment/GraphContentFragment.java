@@ -51,7 +51,8 @@ public class GraphContentFragment extends Fragment {
     private Map<String, String> paras = new HashMap<String, String>();//设置页面所有运行参数
     private Map<String, Object> labData = null;//采集的实验数据
     private Map<String, String> showHoleChart = new HashMap<String, String>();//所有孔的显示状况
-    private Map<String, String> chartType = new HashMap<String, String>();//FAM/HEX显示情况
+    private Map<String, String> chartType = new HashMap<String, String>();// FAM/HEX显示情况
+    private Map<String, String> dissolutionType = new HashMap<String, String>();//溶解或者扩增曲线显示
     public static int[] colors = {Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.rgb(255,0,255),Color.rgb(128,0,128), Color.rgb(210,105,30)};
 
     public ListViewListener listViewListener;
@@ -92,6 +93,8 @@ public class GraphContentFragment extends Fragment {
         hexCheckbox = (CheckBox) chatView.findViewById(R.id.hex_checkbox);
         chartType.put("fam_checkbox", "true");
         chartType.put("hex_checkbox", "false");
+        dissolutionType.put("amp_btn", "true");
+        dissolutionType.put("dis_btn", "false");
         return chatView;
     }
     @Override
@@ -112,6 +115,7 @@ public class GraphContentFragment extends Fragment {
     }
 
     private void bindButtonListener() {
+        increaseBtn.setTag("false");
         increaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,15 +123,37 @@ public class GraphContentFragment extends Fragment {
                     Toast.makeText(listViewListener.getMainContext(), "请先运行扫描程序", Toast.LENGTH_SHORT).show();
                     return;
                 } else if(paras.get("run").equals("true")) {
-                    //drawChart();
-                    mainChart.setVisibility(View.VISIBLE);
+                    if(increaseBtn.getTag().equals("false")) {//未选中
+                        setAmpButtonStyle(true);
+                        setDisButtonStyle(false);//扩增和溶解，只能同时显示一个
+                    } else if(increaseBtn.getTag().equals("true")) {
+                        if(paras.get("dissolution_graph_choice").equals("false")) {//若溶解曲线未做，则无法取消显示扩增曲线
+                            return;
+                        }
+                        setAmpButtonStyle(false);
+                        setDisButtonStyle(true);
+                    }
+                    reDrawChart.reDrawChart();
                 }
             }
         });
+        decreaseBtn.setTag("false");
         decreaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(listViewListener.getMainContext(), "溶解曲线", Toast.LENGTH_SHORT).show();
+                if(paras.get("run").equals("false")) {//扫描未运行
+                    Toast.makeText(listViewListener.getMainContext(), "请先运行扫描程序", Toast.LENGTH_SHORT).show();
+                    return;
+                } else if(paras.get("run").equals("true")) {
+                    if(decreaseBtn.getTag().equals("false")) {//未选中
+                        setDisButtonStyle(true);
+                        setAmpButtonStyle(false);//扩增和溶解，只能同时显示一个
+                    } else if(decreaseBtn.getTag().equals("true")) {
+                        setDisButtonStyle(false);
+                        setAmpButtonStyle(true);
+                    }
+                    reDrawChart.reDrawChart();
+                }
             }
         });
         startRecordData.setOnClickListener(new View.OnClickListener() {
@@ -135,7 +161,14 @@ public class GraphContentFragment extends Fragment {
             public void onClick(View v) {
                 paras.put("run", "true");
                 collectData.getDataFromDb(paras);
-                setStopbtnOnClickable();
+                /*setStopbtnOnClickable();
+                setAmpButtonStyle(true);
+                if(paras.get("dissolution_graph_choice").equals("true")) {
+                    setDecreaseBtnTrue();
+                } else {
+                    setDecreaseBtnFalse();
+                }*/
+                setRunRecordBtn();
             }
         });
         stopRecordData.setOnClickListener(new View.OnClickListener() {
@@ -143,7 +176,12 @@ public class GraphContentFragment extends Fragment {
             public void onClick(View v) {
                 paras.put("run", "false");
                 collectData.stopGetData(paras);
-                setRunbtnOnClickable();
+                /*setRunbtnOnClickable();
+                setAmpButtonStyle(false);
+                if(paras.get("dissolution_graph_choice").equals("true")) {
+                    setDisButtonStyle(false);
+                }*/
+                setStopRecordBtn();
             }
         });
         famCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -314,6 +352,16 @@ public class GraphContentFragment extends Fragment {
         mu.setRunbtnOnClickable(startRecordData, stopRecordData);
     }
 
+    public void setDecreaseBtnTrue() {
+        decreaseBtn.setClickable(true);
+        decreaseBtn.setTextColor(Color.BLACK);
+    }
+
+    public void setDecreaseBtnFalse() {
+        decreaseBtn.setClickable(false);
+        decreaseBtn.setTextColor(Color.GRAY);
+    }
+
     public void setHexCheckboxTrue() {
         hexCheckbox.setClickable(true);
         hexCheckbox.setEnabled(true);
@@ -323,6 +371,57 @@ public class GraphContentFragment extends Fragment {
         hexCheckbox.setClickable(false);
         hexCheckbox.setEnabled(false);
     }
+
+    public void setAmpButtonStyle(boolean flag) {
+        if(flag) {//选中
+            increaseBtn.setTag("true");
+            increaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_selected_style, null));
+            dissolutionType.put("amp_btn", "true");
+        } else {//取消选中
+            increaseBtn.setTag("false");
+            increaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_style, null));
+            dissolutionType.put("amp_btn", "false");
+        }
+    }
+
+    public void setDisButtonStyle(boolean flag) {
+        if(paras.get("dissolution_graph_choice").equals("true")) {
+            if(flag) {
+                decreaseBtn.setTag("true");
+                decreaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_selected_style, null));
+                dissolutionType.put("dis_btn", "true");
+            } else {
+                decreaseBtn.setTag("false");
+                decreaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_style, null));
+                dissolutionType.put("dis_btn", "false");
+            }
+        }
+    }
+
+    public void setRunRecordBtn() {
+        if(increaseBtn == null) {//第一次运行还未实例化
+            return;
+        }
+        setStopbtnOnClickable();
+        setAmpButtonStyle(true);
+        if(paras.get("dissolution_graph_choice").equals("true")) {
+            setDecreaseBtnTrue();
+        } else {
+            setDecreaseBtnFalse();
+        }
+    }
+
+    public void setStopRecordBtn() {
+        if(increaseBtn == null) {//第一次运行还未实例化
+            return;
+        }
+        setRunbtnOnClickable();
+        setAmpButtonStyle(false);
+        if(paras.get("dissolution_graph_choice").equals("true")) {
+            setDisButtonStyle(false);
+        }
+    }
+
 
     class MyAsyncTask extends AsyncTask<Void, Void, String> {//用来处理网络数据，获取网络数据
 

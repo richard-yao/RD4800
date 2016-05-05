@@ -12,12 +12,14 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import yxs.usst.edu.cn.project.R;
+import yxs.usst.edu.cn.project.custom_class.ChildClickableLinearLayout;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.util.MyUtil;
@@ -33,6 +35,7 @@ public class SettingContentFragment extends Fragment {
     EditText changeDefaultTemp,keepTempTime,dissolutionTempNum,changeDefaultStopTemp,changeDefaultCountTemp;
     //运行，停止按钮
     Button startRecordData,stopRecordData;
+    public ChildClickableLinearLayout allContent;
 
     private ListViewListener listViewListener;
     public void setListViewListener(ListViewListener lvl) {
@@ -63,6 +66,7 @@ public class SettingContentFragment extends Fragment {
 
         startRecordData = (Button) chatView.findViewById(R.id.startRecordData);
         stopRecordData = (Button) chatView.findViewById(R.id.stopRecordData);
+        allContent = (ChildClickableLinearLayout) chatView.findViewById(R.id.allSettingContent);
         return chatView;
     }
     @Override
@@ -283,6 +287,7 @@ public class SettingContentFragment extends Fragment {
                 paras.put("run", "true");
                 collectData.getDataFromDb(paras);
                 setStopbtnOnClickable();
+
             }
         });
         stopRecordData.setOnClickListener(new View.OnClickListener() {
@@ -295,6 +300,14 @@ public class SettingContentFragment extends Fragment {
         });
     }
 
+
+    public void setAllContentReadOnly() {
+        allContent.setChildClickable(false);
+    }
+
+    public void setAllContentClickable() {
+        allContent.setChildClickable(true);
+    }
 
     private static void setEditTextReadOnly(TextView view){
         view.setTextColor(Color.GRAY);   //设置只读时的文字颜色
