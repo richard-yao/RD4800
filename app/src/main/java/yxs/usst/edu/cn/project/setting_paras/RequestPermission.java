@@ -1,4 +1,4 @@
-package yxs.usst.edu.cn.project.device_permission;
+package yxs.usst.edu.cn.project.setting_paras;
 
 import android.Manifest;
 import android.app.Activity;

@@ -13,9 +13,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import yxs.usst.edu.cn.project.MainActivity;
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
+import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 import yxs.usst.edu.cn.project.util.MyUtil;
 
 /**
@@ -37,7 +40,17 @@ public class FileContentFragment extends Fragment {
     public void setCreateDialog(CreateDialog createDialog) {
         this.createDialog = createDialog;
     }
-    //public FileDialogFragment fileDialogFragment;
+
+    public interface LabNameSetting {
+        public void setLabName(String labName);
+    }
+
+    public LabNameSetting labNameSetting;
+
+    public void setLabNameSetting(LabNameSetting labNameSetting) {
+        this.labNameSetting = labNameSetting;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         super.onCreateView(inflater, container, savedInstanceState);
@@ -75,6 +88,17 @@ public class FileContentFragment extends Fragment {
                 createDialog.createSaveDialog();
             }
         });
+    }
+
+    private void newDialog() {
+        final AlertDialog alertDialog = new AlertDialog.Builder(listViewListener.getMainContext()).create();
+        alertDialog.setTitle("请输入新建excel文件名");
+        alertDialog.setIcon(R.mipmap.ic_launcher);
+        final View newView = LayoutInflater.from(listViewListener.getMainContext()).inflate(R.layout.new_file_dialog,null);
+        alertDialog.setView(newView);
+        initNewFileDialog(newView, alertDialog);
+        alertDialog.show();
+
     }
 
     private void initNewFileDialog(View view, final AlertDialog alertDialog) {
@@ -123,7 +147,9 @@ public class FileContentFragment extends Fragment {
                 if(newFile.equals("")) {
                     return;
                 }
-                mu.createNewExcel(null, null, newFile, getResources().getString(R.string.app_name));
+                //mu.createNewExcel(null, null, newFile, getResources().getString(R.string.app_name)+"/"+getResources().getString(R.string.amplification));//默认的存放实验结果的文件目录
+                mu.createNewExcel(null, null, newFile, DevicePath.getInstance().getLocalPath());
+                labNameSetting.setLabName(newFile);//将新建excel文件命名为实验名
                 Toast.makeText(listViewListener.getMainContext(), "new excel file successfully!", Toast.LENGTH_SHORT).show();
                 alertDialog.dismiss();
             }
@@ -136,14 +162,5 @@ public class FileContentFragment extends Fragment {
         });
     }
 
-    private void newDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(listViewListener.getMainContext()).create();
-        alertDialog.setTitle("请输入新建excel文件名");
-        alertDialog.setIcon(R.mipmap.ic_launcher);
-        final View newView = LayoutInflater.from(listViewListener.getMainContext()).inflate(R.layout.new_file_dialog,null);
-        alertDialog.setView(newView);
-        initNewFileDialog(newView, alertDialog);
-        alertDialog.show();
 
-    }
 }

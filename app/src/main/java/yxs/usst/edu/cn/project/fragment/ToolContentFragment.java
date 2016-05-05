@@ -2,7 +2,6 @@ package yxs.usst.edu.cn.project.fragment;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +21,7 @@ import java.util.Map;
 
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
+import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 import yxs.usst.edu.cn.project.util.FileItem;
 import yxs.usst.edu.cn.project.custom_class.FileItemAdapter;
 import yxs.usst.edu.cn.project.util.MyUtil;
@@ -41,7 +41,7 @@ public class ToolContentFragment extends Fragment {
         this.listViewListener = lvl;
     }
     MyUtil mu = MyUtil.getInstance();
-    String localPath = "";
+    public static String localPath = "";
     String sdCardPath = "";
     Integer image = R.mipmap.filedialog_root;
 
@@ -59,7 +59,7 @@ public class ToolContentFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
-        localPath = Environment.getExternalStorageDirectory().getPath()+"/" + appName;
+        localPath = DevicePath.getInstance().getLocalPath();
         if(mu.getExtSdCardPath() != null) {
             sdCardPath = mu.getExtSdCardPath() + "/" + appName;
         }
@@ -70,10 +70,6 @@ public class ToolContentFragment extends Fragment {
 
     public void setAppName(String appName) {
         this.appName = appName;
-    }
-
-    public String getLocalPath() {
-        return localPath;
     }
 
     private void bindControlBtnListener() {
@@ -100,7 +96,6 @@ public class ToolContentFragment extends Fragment {
     }
 
     public void showFilesList() {//初始化显示文件列表
-        //String sdCardPath = "/storage/sdcard1/" + appName;
         showLocalFiles();
         showExtFiles();
     }

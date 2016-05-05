@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">RD4800</string>
+    <!--存放采集到的扩增数据的文件-->
+    <string name="ampData">amp_data</string>
+    <!--存放采集到的溶解数据的文件-->
+    <string name="disData">dissolution_data</string>
+    <!--存放默认保存实验结果的文件-->
+    <string name="amplification">amplification</string>
     <string name="fileBtn">文件</string>
     <string name="settingBtn">设置</string>
     <string name="graphBtn">曲线</string>

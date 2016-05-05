@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,6 +30,7 @@ import java.util.Map;
 
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CallbackBundle;
+import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 
 /**
  * Created by Administrator on 2016/4/25.
@@ -173,7 +173,7 @@ public class OpenFileDialog {
 
     static class FileSelectView extends ListView implements OnItemClickListener {
         private CallbackBundle callback = null;
-        private String path = Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/";
+        private String path = DevicePath.getInstance().getLocalPath();
         private List<Map<String, Object>> list = null;
         private String suffix = null;
 
@@ -327,7 +327,6 @@ public class OpenFileDialog {
             }
             this.refreshFileList();
         }
-
 
         public Bundle getFileParaBack() {
             return fileParas;

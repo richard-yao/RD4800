@@ -3,6 +3,7 @@ package yxs.usst.edu.cn.project;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -27,8 +28,9 @@ import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
 import yxs.usst.edu.cn.project.custom_class.DetailViewPager;
 import yxs.usst.edu.cn.project.custom_class.FragmentAdapter;
+import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 import yxs.usst.edu.cn.project.util.MyUtil;
-import yxs.usst.edu.cn.project.device_permission.RequestPermission;
+import yxs.usst.edu.cn.project.setting_paras.RequestPermission;
 
 public class MainActivity extends FragmentActivity {
 
@@ -51,18 +53,32 @@ public class MainActivity extends FragmentActivity {
     private Map<String, Object> labData;//扩增曲线数据
     private static int refreshTime = 60*1000;
     private int runTime = 0;
+    private String newLabName = "";//实验名称，新建时生成
 
     private TextView showTempText,showRunType;
+    MyUtil mu = MyUtil.getInstance();
+    Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initialize();
         findAllControlById();
         initFragmentView();
         RequestPermission.verifyStoragePermissions(this);
     }
 
+    /**
+     * 初始化应用需要用到的文件路径
+     */
+    private void initialize() {
+        DevicePath.getInstance().setRootPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name));
+        DevicePath.getInstance().setLocalPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.amplification));
+        DevicePath.getInstance().setAmpDataPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.ampData));
+        DevicePath.getInstance().setDissolutionPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.disData));
+        mu.createInitializeFolds();
+    }
 
     private void findAllControlById() {
         mViewPager = (DetailViewPager) this.findViewById(R.id.id_fragment_content);
@@ -169,6 +185,12 @@ public class MainActivity extends FragmentActivity {
                 fileDialogFragment.setOpenFile(false);
                 FileDialogFragment.openResult = excelData;
                 fileDialogFragment.show(getSupportFragmentManager(), "Save file");
+            }
+        });
+        mFileFg.setLabNameSetting(new FileContentFragment.LabNameSetting() {
+            @Override
+            public void setLabName(String labName) {
+                newLabName = labName;
             }
         });
 
@@ -349,8 +371,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    MyUtil mu = MyUtil.getInstance();
-    Handler handler = new Handler();
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -401,7 +421,13 @@ public class MainActivity extends FragmentActivity {
         printOutResult(runTime);
         mResultFg.showResultData();//显示实验结果
         if(excelData != null) {
-            mu.createNewExcel(excelData, ResultContentFragment.items, mu.formatDate(), mToolRg.getLocalPath());//停止采集数据后自动保存result
+            String fileName = "";
+            if(newLabName.equals("")) {//没有新建excel
+                fileName = mu.formatDate();
+            } else {//新建excel作为实验结果文件名
+                fileName = newLabName;
+            }
+            mu.createNewExcel(excelData, ResultContentFragment.items, fileName, DevicePath.getInstance().getLocalPath());//停止采集数据后自动保存result
         }
         runTime = 0;
     }

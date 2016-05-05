@@ -27,6 +27,8 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+import yxs.usst.edu.cn.project.MainActivity;
+import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 
 /**
  * Created by Administrator on 2016/4/17.
@@ -90,11 +92,29 @@ public class MyUtil {
         return dateFormater.format(date);
     }
 
+    public void createInitializeFolds() {
+        File file = new File(DevicePath.getInstance().getRootPath());
+        if(!file.exists()) {
+            file.mkdir();//创建应用程序根目录
+        }
+        file = new File(DevicePath.getInstance().getLocalPath());
+        if(!file.exists()) {
+            file.mkdir();//创建存放实验结果的目录
+        }
+        file = new File(DevicePath.getInstance().getDissolutionPath());
+        if(!file.exists()) {
+            file.mkdir();//创建存放溶解数据的目录
+        }
+        file = new File(DevicePath.getInstance().getAmpDataPath());
+        if(!file.exists()) {
+            file.mkdir();//创建存放扩增数据的目录;
+        }
+    }
+
     public List<Map<String, Object>> readExcel(String[] para, String fileName, String directory) {
         try {
             List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
-                //InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName);
                 InputStream is = new FileInputStream(directory);
                 WorkbookSettings workbookSettings = new WorkbookSettings();
                 workbookSettings.setGCDisabled(true);
@@ -136,8 +156,7 @@ public class MyUtil {
             } else {
                 book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath() + "/" + directory + "/" + fileName + ".xls"));
             }
-            //WritableWorkbook book = Workbook.createWorkbook(new File(Environment.getExternalStorageDirectory().getPath()+"/"+directory+"/"+fileName+".xls"));
-            WritableSheet sheet = book.createSheet("Lab_result", 0);
+            WritableSheet sheet = book.createSheet("实验结果", 0);
             for (int i = 0; i < itemsName.length; i++) {
                 sheet.addCell(new Label(i, 0, itemsName[i]));
                 sheet.setColumnView(i, 20);
@@ -192,32 +211,43 @@ public class MyUtil {
         return true;
     }
 
+    /**
+     *
+     * @param type 1是单通道，2是双通道
+     * @return 读取到的扩增曲线的数据
+     */
     public Map<String, Object> getLabDataFromPhone(int type) {
         Map<String, Object> result = new HashMap<String, Object>();
         Map<String, List<String>> famResult = new HashMap<String, List<String>>();
         Map<String, List<String>> hexResult = new HashMap<String, List<String>>();
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
             try {
-                InputStream is = new FileInputStream(Environment.getExternalStorageDirectory().getPath() + "/Labdata/lab_data.xls");
-                WorkbookSettings workbookSettings = new WorkbookSettings();
-                workbookSettings.setGCDisabled(true);
-                Workbook book = Workbook.getWorkbook(is, workbookSettings);
-                if (book.getNumberOfSheets() == 2) {//测试数据，共有两个，一为FAM，一为HEX
-                    if (type == 2) {//双通道
-                        Sheet famSheet = book.getSheet(0);
-                        Sheet hexSheet = book.getSheet(1);
-                        famResult = getSheetData(famSheet);
-                        hexResult = getSheetData(hexSheet);
-                        result.put("FAM", famResult);
-                        result.put("HEX", hexResult);
-                    } else if (type == 1) {//单通道
-                        Sheet famSheet = book.getSheet(0);
-                        famResult = getSheetData(famSheet);
-                        result.put("FAM", famResult);
+                File files = new File(DevicePath.getInstance().getAmpDataPath());
+                File[] listFiles = files.listFiles();
+                if(listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {
+                    String dataFile = DevicePath.getInstance().getAmpDataPath() + "/" +listFiles[0].getName();
+                    InputStream is = new FileInputStream(dataFile);
+                    WorkbookSettings workbookSettings = new WorkbookSettings();
+                    workbookSettings.setGCDisabled(true);
+                    Workbook book = Workbook.getWorkbook(is, workbookSettings);
+                    if (book.getNumberOfSheets() == 2) {//测试数据，共有两个，一为FAM，一为HEX
+                        if (type == 2) {//双通道
+                            Sheet famSheet = book.getSheet(0);
+                            Sheet hexSheet = book.getSheet(1);
+                            famResult = getSheetData(famSheet);
+                            hexResult = getSheetData(hexSheet);
+                            result.put("FAM", famResult);
+                            result.put("HEX", hexResult);
+                        } else if (type == 1) {//单通道
+                            Sheet famSheet = book.getSheet(0);
+                            famResult = getSheetData(famSheet);
+                            result.put("FAM", famResult);
+                        }
+                        book.close();
+                        is.close();
                     }
-                    book.close();
-                    is.close();
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
