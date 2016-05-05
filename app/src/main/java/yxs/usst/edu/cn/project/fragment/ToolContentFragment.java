@@ -37,18 +37,20 @@ public class ToolContentFragment extends Fragment {
     Map<String, String> selectedFiles = new HashMap<String, String>();
 
     private ListViewListener listViewListener;
+
     public void setListViewListener(ListViewListener lvl) {
         this.listViewListener = lvl;
     }
+
     MyUtil mu = MyUtil.getInstance();
     public static String localPath = "";
     String sdCardPath = "";
     Integer image = R.mipmap.filedialog_root;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View chatView = inflater.inflate(R.layout.tool_content_fragment, container,false);
+        View chatView = inflater.inflate(R.layout.tool_content_fragment, container, false);
         exportExcel = (Button) chatView.findViewById(R.id.exportExcel);
         deleteExcel = (Button) chatView.findViewById(R.id.deleteExcel);
         clearExcel = (Button) chatView.findViewById(R.id.clearExcel);
@@ -56,11 +58,12 @@ public class ToolContentFragment extends Fragment {
         outFiles = (ListView) chatView.findViewById(R.id.outFiles);
         return chatView;
     }
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         localPath = DevicePath.getInstance().getLocalPath();
-        if(mu.getExtSdCardPath() != null) {
+        if (mu.getExtSdCardPath() != null) {
             sdCardPath = mu.getExtSdCardPath() + "/" + appName;
         }
         //sdCardPath = mu.getExtSdCardPath() + "/" + appName;
@@ -113,10 +116,10 @@ public class ToolContentFragment extends Fragment {
             Toast.makeText(listViewListener.getMainContext(), "Get file wrong!", Toast.LENGTH_SHORT).show();
             return null;
         }
-        for(File temp:files) {
-            if(temp.isDirectory() || temp.listFiles() != null) {
+        for (File temp : files) {
+            if (temp.isDirectory() || temp.listFiles() != null) {
                 continue;
-            } else if(temp.isFile() && temp.getName().toLowerCase().endsWith(".xls")) {
+            } else if (temp.isFile() && temp.getName().toLowerCase().endsWith(".xls")) {
                 FileItem tempFile = new FileItem();
                 tempFile.setImages(img);
                 tempFile.setFileName(temp.getName());
@@ -127,9 +130,9 @@ public class ToolContentFragment extends Fragment {
     }
 
     private void showLocalFiles() {
-        if(localPath != null) {
+        if (localPath != null) {
             List<FileItem> localList = directoryFiles(localPath, image);
-            if(localList != null && localList.size() > 0) {
+            if (localList != null && localList.size() > 0) {
                 FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, localList);
                 localFiles.setAdapter(localAdapter);
                 localFiles.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -137,11 +140,11 @@ public class ToolContentFragment extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         TextView fileName = (TextView) view.findViewById(R.id.filedialogitem_name);
                         LinearLayout item = (LinearLayout) view.findViewById(R.id.file_item_id);
-                        if(item.getTag() == null || item.getTag().equals("")) {
+                        if (item.getTag() == null || item.getTag().equals("")) {
                             item.setTag("selected");
                             item.setBackgroundColor(Color.CYAN);
                             selectedFiles.put(String.valueOf(position), fileName.getText().toString().trim());
-                        } else if(item.getTag().equals("selected")) {
+                        } else if (item.getTag().equals("selected")) {
                             item.setTag("");
                             item.setBackgroundColor(Color.TRANSPARENT);
                             selectedFiles.remove(String.valueOf(position));
@@ -160,9 +163,9 @@ public class ToolContentFragment extends Fragment {
     }
 
     private void showExtFiles() {
-        if(sdCardPath != null && !sdCardPath.equals("")) {
+        if (sdCardPath != null && !sdCardPath.equals("")) {
             List<FileItem> extList = directoryFiles(sdCardPath, image);
-            if(extList == null || extList.size() == 0) {
+            if (extList == null || extList.size() == 0) {
                 extList = new ArrayList<FileItem>();
                 FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, extList);
                 localFiles.setAdapter(localAdapter);
@@ -171,7 +174,7 @@ public class ToolContentFragment extends Fragment {
                 outFiles.setEmptyView(tip);
                 return;
             }
-            if(extList != null && extList.size() > 0) {
+            if (extList != null && extList.size() > 0) {
                 FileItemAdapter extAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, extList);
                 outFiles.setAdapter(extAdapter);
             }
@@ -180,15 +183,15 @@ public class ToolContentFragment extends Fragment {
 
 
     private void exportExcelOut() {
-        if(selectedFiles.size() == 0) {
+        if (selectedFiles.size() == 0) {
             Toast.makeText(listViewListener.getMainContext(), "Please select files to export out", Toast.LENGTH_SHORT).show();
         } else {
-            if(mu.getExtSdCardPath() == null) {
+            if (mu.getExtSdCardPath() == null) {
                 Toast.makeText(listViewListener.getMainContext(), "Please sure the sdcard is mounted", Toast.LENGTH_SHORT).show();
                 return;
             }
-            for(String temp:selectedFiles.keySet()) {
-                String result = mu.copySdcardFile(localPath+"/"+selectedFiles.get(temp), sdCardPath+"/"+selectedFiles.get(temp));
+            for (String temp : selectedFiles.keySet()) {
+                String result = mu.copySdcardFile(localPath + "/" + selectedFiles.get(temp), sdCardPath + "/" + selectedFiles.get(temp));
                 Toast.makeText(listViewListener.getMainContext(), result, Toast.LENGTH_SHORT).show();
             }
         }
@@ -196,11 +199,11 @@ public class ToolContentFragment extends Fragment {
     }
 
     private void deleteLocalExcel() {
-        if(selectedFiles.size() == 0) {
+        if (selectedFiles.size() == 0) {
             Toast.makeText(listViewListener.getMainContext(), "Please select files to export out", Toast.LENGTH_SHORT).show();
         } else {
-            for(String temp:selectedFiles.keySet()) {
-                File file = new File(localPath+"/"+selectedFiles.get(temp));
+            for (String temp : selectedFiles.keySet()) {
+                File file = new File(localPath + "/" + selectedFiles.get(temp));
                 mu.deleteFile(file);
             }
         }

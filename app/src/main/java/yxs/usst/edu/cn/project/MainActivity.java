@@ -10,7 +10,6 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import yxs.usst.edu.cn.project.fragment.FileContentFragment;
 import yxs.usst.edu.cn.project.custom_class.FileDialogFragment;
 import yxs.usst.edu.cn.project.fragment.GraphContentFragment;
@@ -40,7 +40,7 @@ public class MainActivity extends FragmentActivity {
     private List<Fragment> mFragmentList = new ArrayList<Fragment>();//all fragment
     private FragmentAdapter mFragmentAdapter;
     private DetailViewPager mViewPager;//id_fragment_content, show changed fragment content
-    Button fileFeature,settingFeature,graphFeature,resultFeature,toolFeature;
+    Button fileFeature, settingFeature, graphFeature, resultFeature, toolFeature;
     private FileContentFragment mFileFg;
     private SettingContentFragment mSettingFg;
     private GraphContentFragment mGraphFg;
@@ -51,19 +51,19 @@ public class MainActivity extends FragmentActivity {
     public List<Map<String, Object>> excelData = null;
     public Map<String, String> settingParas = null;
     //map参数中所有参数的key值
-    public static String[] settingParasName = {"hex_graph_choice","default_temp_choice","dissolution_graph_choice","stop_dissolution_temp_choice","default_count_temp_choice",
-            "default_temp_edit","default_keeptime_edit","dissolution_tempnum_edit","change_stoptemp_edit","change_counttemp_edit","run"};
+    public static String[] settingParasName = {"hex_graph_choice", "default_temp_choice", "dissolution_graph_choice", "stop_dissolution_temp_choice", "default_count_temp_choice",
+            "default_temp_edit", "default_keeptime_edit", "dissolution_tempnum_edit", "change_stoptemp_edit", "change_counttemp_edit", "run"};
     private Map<String, Object> labData;//扩增曲线数据
     private Map<String, Object> dissolutionData;//溶解曲线数据
-    private static int refreshTime = 60*1000;//设定扩增扫描时间1分钟
+    private static int refreshTime = 60 * 1000;//设定扩增扫描时间1分钟
     private static boolean ampFlag = false;
-    private static int temperatureTime = 80*1000;//设定溶解温度变化一度时间是80s
+    private static int temperatureTime = 80 * 1000;//设定溶解温度变化一度时间是80s
     private static boolean disFlag = false;
     private int runTime = 0;
     private int disTimes = 0;
     private String newLabName = "";//实验名称，新建时生成
 
-    private TextView showTempText,showRunType;
+    private TextView showTempText, showRunType;
     MyUtil mu = MyUtil.getInstance();
     AmpTaskThread ampTaskThread = new AmpTaskThread();
     DisTaskThread disTaskThread = new DisTaskThread();
@@ -82,10 +82,10 @@ public class MainActivity extends FragmentActivity {
      * 初始化应用需要用到的文件路径
      */
     private void initialize() {
-        DevicePath.getInstance().setRootPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name));
-        DevicePath.getInstance().setLocalPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.amplification));
-        DevicePath.getInstance().setAmpDataPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.ampData));
-        DevicePath.getInstance().setDissolutionPath(Environment.getExternalStorageDirectory().getPath()+"/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.disData));
+        DevicePath.getInstance().setRootPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name));
+        DevicePath.getInstance().setLocalPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.amplification));
+        DevicePath.getInstance().setAmpDataPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.ampData));
+        DevicePath.getInstance().setDissolutionPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.disData));
         mu.createInitializeFolds();
     }
 
@@ -96,10 +96,10 @@ public class MainActivity extends FragmentActivity {
         fileFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mViewPager.getCurrentItem() == 1) {
+                if (mViewPager.getCurrentItem() == 1) {
                     settingParas = mSettingFg.getParas();
                 }
-                if(mViewPager.getCurrentItem() == 2) {
+                if (mViewPager.getCurrentItem() == 2) {
                     mGraphFg.setParas(settingParas);
                 }
                 mViewPager.setCurrentItem(0);
@@ -110,7 +110,7 @@ public class MainActivity extends FragmentActivity {
         settingFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mViewPager.getCurrentItem() == 2) {
+                if (mViewPager.getCurrentItem() == 2) {
                     mGraphFg.setParas(settingParas);
                 }
                 mViewPager.setCurrentItem(1);
@@ -121,7 +121,7 @@ public class MainActivity extends FragmentActivity {
         graphFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mViewPager.getCurrentItem() == 1) {
+                if (mViewPager.getCurrentItem() == 1) {
                     settingParas = mSettingFg.getParas();
                 }
                 mGraphFg.setParas(settingParas);
@@ -133,10 +133,10 @@ public class MainActivity extends FragmentActivity {
         resultFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mViewPager.getCurrentItem() == 1) {
+                if (mViewPager.getCurrentItem() == 1) {
                     settingParas = mSettingFg.getParas();
                 }
-                if(mViewPager.getCurrentItem() == 2) {
+                if (mViewPager.getCurrentItem() == 2) {
                     mGraphFg.setParas(settingParas);
                 }
                 mViewPager.setCurrentItem(3);
@@ -147,10 +147,10 @@ public class MainActivity extends FragmentActivity {
         toolFeature.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mViewPager.getCurrentItem() == 1) {
+                if (mViewPager.getCurrentItem() == 1) {
                     settingParas = mSettingFg.getParas();
                 }
-                if(mViewPager.getCurrentItem() == 2) {
+                if (mViewPager.getCurrentItem() == 2) {
                     mGraphFg.setParas(settingParas);
                 }
                 mViewPager.setCurrentItem(4);
@@ -232,10 +232,10 @@ public class MainActivity extends FragmentActivity {
                 //mGraphFg.setRunbtnOnClickable();
                 mGraphFg.setStopRecordBtn();
                 mSettingFg.setAllContentClickable();
-                if(settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
+                if (settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
                     ampFlag = true;
                     disFlag = true;
-                } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
+                } else if (settingParas.get("dissolution_graph_choice").equals("false")) {
                     ampFlag = true;
                 }
                 stopGetDataFromDb();
@@ -270,10 +270,10 @@ public class MainActivity extends FragmentActivity {
                 settingParas = paras;
                 mSettingFg.setRunbtnOnClickable();
                 mSettingFg.setAllContentClickable();
-                if(settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
+                if (settingParas.get("dissolution_graph_choice").equals("true")) {//强制停止运行实验
                     ampFlag = true;
                     disFlag = true;
-                } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
+                } else if (settingParas.get("dissolution_graph_choice").equals("false")) {
                     ampFlag = true;
                 }
                 stopGetDataFromDb();
@@ -283,9 +283,9 @@ public class MainActivity extends FragmentActivity {
         mGraphFg.setReDrawChart(new GraphContentFragment.ReDrawChart() {
             @Override
             public void reDrawChart(int type) {
-                if(type == 1) {
+                if (type == 1) {
                     mGraphFg.drawChart(runTime);//重新绘制扩增图形
-                } else if(type == 2) {
+                } else if (type == 2) {
                     mGraphFg.drawChart(disTimes);//重新绘制溶解图形
                 }
 
@@ -326,7 +326,7 @@ public class MainActivity extends FragmentActivity {
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if(position == 1) {
+                if (position == 1) {
                     settingParas = mSettingFg.getParas();//当setting页面滑动时，main获得设置的参数
                     mGraphFg.setParas(settingParas);
                 }
@@ -335,10 +335,10 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onPageSelected(int position) {
                 resetTextView(position);
-                if(position == 3) {
+                if (position == 3) {
                     mResultFg.showResultData();
                 }
-                if(position == 4) {
+                if (position == 4) {
                     mToolRg.showFilesList();//重新加载显示文件目录
                 }
             }
@@ -379,11 +379,11 @@ public class MainActivity extends FragmentActivity {
     //change title button background color
     private void changeTitleBtnColor(int btnId) {
         Integer[] allTitle = {R.id.fileFeature, R.id.settingFeature, R.id.graphFeature, R.id.resultFeature, R.id.toolFeature};
-        for(int temp:allTitle) {
-            if(btnId == temp) {
+        for (int temp : allTitle) {
+            if (btnId == temp) {
                 continue;
             }
-            if(findViewById(temp) != null) {
+            if (findViewById(temp) != null) {
                 findViewById(temp).setBackgroundColor(getResources().getColor(R.color.titleBackColor));
             }
         }
@@ -398,17 +398,21 @@ public class MainActivity extends FragmentActivity {
         MyUtil mu = MyUtil.getInstance();
         excelData = mu.readExcel(ResultContentFragment.items, fileName, filePath);
         Toast.makeText(this, "RD4800 get excel data successfully", Toast.LENGTH_SHORT).show();
-        if(excelData == null) {
+        if (excelData == null) {
             excelData = mu.creatTestData(ResultContentFragment.items);
         }
     }
 
 
     private Handler handler = new Handler() {
-        protected void handlerMessage(Message msg){
+        protected void handlerMessage(Message msg) {
             switch (msg.what) {
-                case 2:Toast.makeText(getInstance(), "Get data from dis excel", Toast.LENGTH_SHORT).show();break;
-                case 1:Toast.makeText(getInstance(), "Get data from amp excel", Toast.LENGTH_SHORT).show();break;
+                case 2:
+                    Toast.makeText(getInstance(), "Get data from dis excel", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
+                    Toast.makeText(getInstance(), "Get data from amp excel", Toast.LENGTH_SHORT).show();
+                    break;
             }
         }
     };
@@ -419,13 +423,13 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void run() {
             Looper.prepare();
-            if(settingParas == null) {
+            if (settingParas == null) {
                 return;
             }
             Integer temp = Integer.parseInt(settingParas.get("default_keeptime_edit").toString().trim());
-            while(!stop && runTime < temp) {
+            while (!stop && runTime < temp) {
                 runTime++;
-                if(settingParas.get("hex_graph_choice").equals("true")) {
+                if (settingParas.get("hex_graph_choice").equals("true")) {
                     labData = mu.getLabDataFromPhone(2, 1);
                 } else {
                     labData = mu.getLabDataFromPhone(1, 1);
@@ -452,17 +456,18 @@ public class MainActivity extends FragmentActivity {
 
     public class DisTaskThread implements Runnable {
         public volatile boolean stop = false;
+
         @Override
         public void run() {
             Looper.prepare();
-            if(settingParas == null) {
+            if (settingParas == null) {
                 return;
             }
             Integer tempCount = Integer.parseInt(settingParas.get("change_counttemp_edit"));//度数误差
-            Double tempGap = Double.parseDouble(settingParas.get("change_stoptemp_edit"))- Double.parseDouble(settingParas.get("dissolution_tempnum_edit"));
-            while(!stop && disTimes < mu.divideValue(tempGap, tempCount, 0)) {
+            Double tempGap = Double.parseDouble(settingParas.get("change_stoptemp_edit")) - Double.parseDouble(settingParas.get("dissolution_tempnum_edit"));
+            while (!stop && disTimes < mu.divideValue(tempGap, tempCount, 0)) {
                 disTimes++;
-                if(settingParas.get("dissolution_graph_choice").equals("true")) {//采集溶解曲线数据
+                if (settingParas.get("dissolution_graph_choice").equals("true")) {//采集溶解曲线数据
                     if (settingParas.get("hex_graph_choice").equals("true")) {
                         dissolutionData = mu.getLabDataFromPhone(2, 2);
                     } else {
@@ -539,49 +544,49 @@ public class MainActivity extends FragmentActivity {
     };*/
 
     public void startGetDataFromDb() {//运行
-        if(excelData != null && excelData.size() > 0) {
+        if (excelData != null && excelData.size() > 0) {
             excelData = new ArrayList<Map<String, Object>>();
             mResultFg.clearResultData();//清除掉旧的实验结果
         }
         showRunType.setText("运行");
-        if(settingParas.get("default_temp_edit") != null) {
-            showTempText.setText(settingParas.get("default_temp_edit")+"℃");
+        if (settingParas.get("default_temp_edit") != null) {
+            showTempText.setText(settingParas.get("default_temp_edit") + "℃");
         }
-        if(settingParas.get("hex_graph_choice").equals("false")) {//如果设置页面没有勾选采集hex通道数据，则这里无法点击选择
+        if (settingParas.get("hex_graph_choice").equals("false")) {//如果设置页面没有勾选采集hex通道数据，则这里无法点击选择
             mGraphFg.setHexCheckboxFalse();
-        } else if(settingParas.get("hex_graph_choice").equals("true")) {
+        } else if (settingParas.get("hex_graph_choice").equals("true")) {
             mGraphFg.setHexCheckboxTrue();
         }
         //handler.post(runnable);
         new Thread(ampTaskThread).start();
-        if(settingParas.get("dissolution_graph_choice").equals("true")) {
+        if (settingParas.get("dissolution_graph_choice").equals("true")) {
             //handler.post(disRunnale);
             new Thread(disTaskThread).start();
         }
     }
 
     public void stopGetDataFromDb() {//停止
-        if(runTime == 0) {
+        if (runTime == 0) {
             return;
         }
         boolean flag = false;
-        if(settingParas.get("dissolution_graph_choice").equals("true")) {
-            if(ampFlag && disFlag) {
+        if (settingParas.get("dissolution_graph_choice").equals("true")) {
+            if (ampFlag && disFlag) {
                 flag = true;
             }
-        } else if(settingParas.get("dissolution_graph_choice").equals("false")) {
-            if(ampFlag) {
+        } else if (settingParas.get("dissolution_graph_choice").equals("false")) {
+            if (ampFlag) {
                 flag = true;
             }
         }
-        if(flag) {
+        if (flag) {
             mSettingFg.setRunbtnOnClickable();//后台采集停止运行，运行按钮可以点击
             mGraphFg.setRunbtnOnClickable();
             showRunType.setText("停止");
             ampTaskThread.stop = true;
             //handler.removeCallbacks(runnable);
             ampFlag = false;
-            if(settingParas.get("dissolution_graph_choice").equals("true")) {
+            if (settingParas.get("dissolution_graph_choice").equals("true")) {
                 //handler.removeCallbacks(disRunnale);
                 disTaskThread.stop = true;
                 disTimes = 0;
@@ -589,9 +594,9 @@ public class MainActivity extends FragmentActivity {
             }
             printOutResult(runTime);
             mResultFg.showResultData();//显示实验结果
-            if(excelData != null) {
+            if (excelData != null) {
                 String fileName = "";
-                if(newLabName.equals("")) {//没有新建excel
+                if (newLabName.equals("")) {//没有新建excel
                     fileName = mu.formatDate();
                 } else {//新建excel作为实验结果文件名
                     fileName = newLabName;
@@ -604,25 +609,25 @@ public class MainActivity extends FragmentActivity {
     }
 
     private void printOutResult(int runTime) {//显示扩增实验结果
-        if(labData == null) {
+        if (labData == null) {
             return;
         } else {
             Map<String, List<String>> famResult = (Map<String, List<String>>) labData.get("FAM");
             List<Map<String, Object>> recordResult = new ArrayList<Map<String, Object>>();
             String[] items = ResultContentFragment.items;
-            for(int i=0;i<famResult.size();i++) {
+            for (int i = 0; i < famResult.size(); i++) {
                 Map<String, Object> temp = new HashMap<String, Object>();
-                temp.put(items[0], i+1);//第一个是孔序号
-                Map<String, String> tempResult = mu.getChartResult(famResult.get(String.valueOf(i+1)), 1, runTime);
-                for(int j=1;j<items.length;j++) {
-                    if(j == 6) {//dt值
+                temp.put(items[0], i + 1);//第一个是孔序号
+                Map<String, String> tempResult = mu.getChartResult(famResult.get(String.valueOf(i + 1)), 1, runTime);
+                for (int j = 1; j < items.length; j++) {
+                    if (j == 6) {//dt值
                         temp.put(items[j], tempResult.get("dt"));
-                    } else if(j == 7) {//结果
-                        if(tempResult.get("result").equals("1")) {
+                    } else if (j == 7) {//结果
+                        if (tempResult.get("result").equals("1")) {
                             temp.put(items[j], getResources().getString(R.string.positiveVal));
-                        } else if(tempResult.get("result").equals("0")) {
+                        } else if (tempResult.get("result").equals("0")) {
                             temp.put(items[j], getResources().getString(R.string.negativeVal));
-                        } else if(tempResult.get("result").equals("2")) {
+                        } else if (tempResult.get("result").equals("2")) {
                             temp.put(items[j], "wrong!");
                         }
                     } else {

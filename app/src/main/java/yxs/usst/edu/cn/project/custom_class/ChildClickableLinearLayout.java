@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 /**
  * Created by Administrator on 2016/5/5.
  */
-public class ChildClickableLinearLayout extends LinearLayout{
+public class ChildClickableLinearLayout extends LinearLayout {
 
     //子控件是否可以接受点击事件
     private boolean childClickable = true;

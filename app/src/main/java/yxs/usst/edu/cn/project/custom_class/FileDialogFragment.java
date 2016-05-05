@@ -48,20 +48,20 @@ public class FileDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Map<String, Integer> images = new HashMap<String, Integer>();
-        images.put(OpenFileDialog.sRoot, R.mipmap.filedialog_root);	// 根目录图标
-        images.put(OpenFileDialog.sParent, R.mipmap.filedialog_folder_up);	//返回上一层的图标
-        images.put(OpenFileDialog.sFolder, R.mipmap.filedialog_folder);	//文件夹图标
+        images.put(OpenFileDialog.sRoot, R.mipmap.filedialog_root);    // 根目录图标
+        images.put(OpenFileDialog.sParent, R.mipmap.filedialog_folder_up);    //返回上一层的图标
+        images.put(OpenFileDialog.sFolder, R.mipmap.filedialog_folder);    //文件夹图标
         images.put(OpenFileDialog.sEmpty, R.mipmap.filedialog_root);
         OpenFileDialog.para = ResultContentFragment.items;//save data parameters
         Dialog dialog = null;
-        if(openFile) {
+        if (openFile) {
             dialog = OpenFileDialog.getInstance().createDialog(context, 1, new CallbackBundle() {
-                        @Override
-                        public void callback(Bundle bundle) {
-                            String filepath = bundle.getString("path");
-                            String name = bundle.getString("name");//选中的excel文件
-                            setExcelPath.excelPath(filepath, name);
-                        }
+                @Override
+                public void callback(Bundle bundle) {
+                    String filepath = bundle.getString("path");
+                    String name = bundle.getString("name");//选中的excel文件
+                    setExcelPath.excelPath(filepath, name);
+                }
             }, ".xls;", images);
         } else {
             dialog = OpenFileDialog.getInstance().createDialog(context, 2, new CallbackBundle() {

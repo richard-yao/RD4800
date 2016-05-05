@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import yxs.usst.edu.cn.project.MainActivity;
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CreateDialog;
 import yxs.usst.edu.cn.project.interface_class.ListViewListener;
@@ -26,7 +25,7 @@ import yxs.usst.edu.cn.project.util.MyUtil;
  */
 public class FileContentFragment extends Fragment {
 
-    private Button newFile,openFile,saveFile;
+    private Button newFile, openFile, saveFile;
     private ListViewListener listViewListener;
     private CreateDialog createDialog;
     private EditText fileName;
@@ -37,6 +36,7 @@ public class FileContentFragment extends Fragment {
     public void setListViewListener(ListViewListener lvl) {
         this.listViewListener = lvl;
     }
+
     public void setCreateDialog(CreateDialog createDialog) {
         this.createDialog = createDialog;
     }
@@ -52,16 +52,17 @@ public class FileContentFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View chatView = inflater.inflate(R.layout.file_content_fragment, container,false);
+        View chatView = inflater.inflate(R.layout.file_content_fragment, container, false);
         newFile = (Button) chatView.findViewById(R.id.newFile);
         openFile = (Button) chatView.findViewById(R.id.openFile);
         saveFile = (Button) chatView.findViewById(R.id.saveFile);
         return chatView;
     }
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         bindOnclickEvent();
     }
@@ -94,7 +95,7 @@ public class FileContentFragment extends Fragment {
         final AlertDialog alertDialog = new AlertDialog.Builder(listViewListener.getMainContext()).create();
         alertDialog.setTitle("请输入新建excel文件名");
         alertDialog.setIcon(R.mipmap.ic_launcher);
-        final View newView = LayoutInflater.from(listViewListener.getMainContext()).inflate(R.layout.new_file_dialog,null);
+        final View newView = LayoutInflater.from(listViewListener.getMainContext()).inflate(R.layout.new_file_dialog, null);
         alertDialog.setView(newView);
         initNewFileDialog(newView, alertDialog);
         alertDialog.show();
@@ -109,6 +110,7 @@ public class FileContentFragment extends Fragment {
 
         TextWatcher textWatcher = new TextWatcher() {
             String tempText;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -122,10 +124,10 @@ public class FileContentFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 MyUtil mu = MyUtil.getInstance();
-                if(tempText.toString().trim().equals("")) {
+                if (tempText.toString().trim().equals("")) {
                     return;
                 }
-                if(!mu.validateText(tempText)) {
+                if (!mu.validateText(tempText)) {
                     inputTip.setText("文件名称含有非法字符!");
                     inputTip.setTextColor(Color.RED);
                     inputTip.setFocusable(true);
@@ -144,7 +146,7 @@ public class FileContentFragment extends Fragment {
             public void onClick(View v) {
                 MyUtil mu = MyUtil.getInstance();
                 String newFile = fileName.getText().toString().trim();
-                if(newFile.equals("")) {
+                if (newFile.equals("")) {
                     return;
                 }
                 //mu.createNewExcel(null, null, newFile, getResources().getString(R.string.app_name)+"/"+getResources().getString(R.string.amplification));//默认的存放实验结果的文件目录

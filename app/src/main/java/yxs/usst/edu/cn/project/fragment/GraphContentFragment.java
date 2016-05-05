@@ -45,7 +45,7 @@ import yxs.usst.edu.cn.project.util.MyUtil;
 public class GraphContentFragment extends Fragment {
     private static String dataUrl = null;
     private LineChartView mainChart;
-    private Button increaseBtn,decreaseBtn,startRecordData,stopRecordData;
+    private Button increaseBtn, decreaseBtn, startRecordData, stopRecordData;
     private LinearLayout holePart;
     private CheckBox famCheckbox, hexCheckbox;
     private Map<String, String> paras = new HashMap<String, String>();//设置页面所有运行参数
@@ -54,7 +54,7 @@ public class GraphContentFragment extends Fragment {
     private Map<String, String> showHoleChart = new HashMap<String, String>();//所有孔的显示状况
     private Map<String, String> chartType = new HashMap<String, String>();// FAM/HEX显示情况
     private Map<String, String> dissolutionType = new HashMap<String, String>();//溶解或者扩增曲线显示
-    public static int[] colors = {Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.rgb(255,0,255),Color.rgb(128,0,128), Color.rgb(210,105,30)};
+    public static int[] colors = {Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.rgb(255, 0, 255), Color.rgb(128, 0, 128), Color.rgb(210, 105, 30)};
 
     public ListViewListener listViewListener;
     private CollectData collectData;
@@ -62,6 +62,7 @@ public class GraphContentFragment extends Fragment {
     public void setCollectData(CollectData collectData) {
         this.collectData = collectData;
     }
+
     public void setListViewListener(ListViewListener listViewListener) {
         this.listViewListener = listViewListener;
     }
@@ -77,10 +78,10 @@ public class GraphContentFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View chatView = inflater.inflate(R.layout.graph_content_fragment, container,false);
-        if(dataUrl == null) {
+        View chatView = inflater.inflate(R.layout.graph_content_fragment, container, false);
+        if (dataUrl == null) {
             dataUrl = chatView.getResources().getString(R.string.web_http);
             dataUrl = dataUrl + "/GetDataServlet";
         }
@@ -98,15 +99,16 @@ public class GraphContentFragment extends Fragment {
         dissolutionType.put("dis_btn", "false");
         return chatView;
     }
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         bindButtonListener();
-        if(paras != null && paras.get("run") != null) {
-            if(paras.get("run").equals("true")) {
+        if (paras != null && paras.get("run") != null) {
+            if (paras.get("run").equals("true")) {
                 collectData.getDataFromDb(paras);
                 setStopbtnOnClickable();
-            } else if(paras.get("run").equals("false")){
+            } else if (paras.get("run").equals("false")) {
                 collectData.stopGetData(paras);
                 setRunbtnOnClickable();
             }
@@ -120,11 +122,11 @@ public class GraphContentFragment extends Fragment {
         increaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(paras.get("run").equals("false")) {//扫描未运行
+                if (paras.get("run").equals("false")) {//扫描未运行
                     Toast.makeText(listViewListener.getMainContext(), "请先运行扫描程序", Toast.LENGTH_SHORT).show();
                     return;
-                } else if(paras.get("run").equals("true")) {
-                    if(increaseBtn.getTag().equals("false")) {//未选中
+                } else if (paras.get("run").equals("true")) {
+                    if (increaseBtn.getTag().equals("false")) {//未选中
                         setAmpButtonStyle(true);
                         setDisButtonStyle(false);//扩增和溶解，只能同时显示一个
                     } /*else if(increaseBtn.getTag().equals("true")) {
@@ -142,11 +144,11 @@ public class GraphContentFragment extends Fragment {
         decreaseBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(paras.get("run").equals("false")) {//扫描未运行
+                if (paras.get("run").equals("false")) {//扫描未运行
                     Toast.makeText(listViewListener.getMainContext(), "请先运行扫描程序", Toast.LENGTH_SHORT).show();
                     return;
-                } else if(paras.get("run").equals("true")) {
-                    if(decreaseBtn.getTag().equals("false")) {//未选中
+                } else if (paras.get("run").equals("true")) {
+                    if (decreaseBtn.getTag().equals("false")) {//未选中
                         setDisButtonStyle(true);
                         setAmpButtonStyle(false);//扩增和溶解，只能同时显示一个
                     } /*else if(decreaseBtn.getTag().equals("true")) {
@@ -188,12 +190,12 @@ public class GraphContentFragment extends Fragment {
         famCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     chartType.put("fam_checkbox", "true");
                 } else {
                     chartType.put("fam_checkbox", "false");
                 }
-                if(increaseBtn.getTag().equals("true")) {//扩增曲线
+                if (increaseBtn.getTag().equals("true")) {//扩增曲线
                     reDrawChart.reDrawChart(1);
                 } else {
                     reDrawChart.reDrawChart(2);
@@ -204,12 +206,12 @@ public class GraphContentFragment extends Fragment {
         hexCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     chartType.put("hex_checkbox", "true");
                 } else {
                     chartType.put("hex_checkbox", "false");
                 }
-                if(increaseBtn.getTag().equals("true")) {//扩增曲线
+                if (increaseBtn.getTag().equals("true")) {//扩增曲线
                     reDrawChart.reDrawChart(1);
                 } else {
                     reDrawChart.reDrawChart(2);
@@ -220,15 +222,15 @@ public class GraphContentFragment extends Fragment {
 
     private void bindHolePartListener() {
         Resources res = listViewListener.getMainContext().getResources();
-        Drawable draw=res.getDrawable(R.mipmap.circle_hole, null);
+        Drawable draw = res.getDrawable(R.mipmap.circle_hole, null);
         int number = 1;
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1.0f);
-        for(int i=0;i<8;i++) {//总共8行数据
+        for (int i = 0; i < 8; i++) {//总共8行数据
             LinearLayout tempLayout = new LinearLayout(listViewListener.getMainContext());
             tempLayout.setOrientation(LinearLayout.HORIZONTAL);
             tempLayout.setBackgroundColor(colors[i]);
             tempLayout.setLayoutParams(lp);
-            for(int j=0;j<6;j++) {//每行孔数
+            for (int j = 0; j < 6; j++) {//每行孔数
                 final ImageButton tempBtn = new ImageButton(listViewListener.getMainContext());
                 tempBtn.setLayoutParams(lp);
                 tempBtn.setBackground(draw);
@@ -237,14 +239,14 @@ public class GraphContentFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         String tag = (String) tempBtn.getTag();
-                        if(showHoleChart.get(tag).equals("true")) {
+                        if (showHoleChart.get(tag).equals("true")) {
                             showHoleChart.put(tag, "false");
                             tempBtn.setAlpha(0.5f);//不透明
                         } else {
                             showHoleChart.put(tag, "true");
                             tempBtn.setAlpha(1.0f);
                         }
-                        if(increaseBtn.getTag().equals("true")) {
+                        if (increaseBtn.getTag().equals("true")) {
                             reDrawChart.reDrawChart(1);
                         } else {
                             reDrawChart.reDrawChart(2);
@@ -272,57 +274,56 @@ public class GraphContentFragment extends Fragment {
     }
 
     public void setShowHoleChart() {//初始化
-        if(showHoleChart.size() == 0) {
-            for(int i=1;i<=48;i++) {
+        if (showHoleChart.size() == 0) {
+            for (int i = 1; i <= 48; i++) {
                 showHoleChart.put(String.valueOf(i), "true");//默认显示所有孔曲线
             }
         }
     }
 
     /**
-     *
      * @param time 运行次数，即绘制出来的点数
      */
     public void drawChart(int time) {
         Map<String, List<String>> famResult = null;
         Map<String, List<String>> hexResult = null;
         int type = 0;
-        if(dissolutionType.get("amp_btn").equals("true")) {
+        if (dissolutionType.get("amp_btn").equals("true")) {
             type = 1;
-        } else if(dissolutionType.get("dis_btn").equals("true")) {
+        } else if (dissolutionType.get("dis_btn").equals("true")) {
             type = 2;
         }
-        if(type == 1) {
-            if(chartType.get("fam_checkbox").equals("true")) {
+        if (type == 1) {
+            if (chartType.get("fam_checkbox").equals("true")) {
                 famResult = (Map<String, List<String>>) labData.get("FAM");
             }
-            if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
-                if(chartType.get("hex_checkbox").equals("true")) {//显示hex
+            if (hexCheckbox.isClickable()) {//可点击，双通道采集数据
+                if (chartType.get("hex_checkbox").equals("true")) {//显示hex
                     hexResult = (Map<String, List<String>>) labData.get("HEX");
                 }
             }
-        } else if(type == 2) {
-            if(chartType.get("fam_checkbox").equals("true")) {
+        } else if (type == 2) {
+            if (chartType.get("fam_checkbox").equals("true")) {
                 famResult = (Map<String, List<String>>) dissolutionData.get("FAM");
             }
-            if(hexCheckbox.isClickable()) {//可点击，双通道采集数据
-                if(chartType.get("hex_checkbox").equals("true")) {//显示hex
+            if (hexCheckbox.isClickable()) {//可点击，双通道采集数据
+                if (chartType.get("hex_checkbox").equals("true")) {//显示hex
                     hexResult = (Map<String, List<String>>) dissolutionData.get("HEX");
                 }
             }
         }
         List<Line> lines = new ArrayList<Line>();
-        for(int i=1;i<=48;i++) {//从1到48个孔
-            int num = (i-1)/6;
-            if(showHoleChart.get(String.valueOf(i)).equals("true")) {//该孔曲线显示
-                if(famResult != null) {
+        for (int i = 1; i <= 48; i++) {//从1到48个孔
+            int num = (i - 1) / 6;
+            if (showHoleChart.get(String.valueOf(i)).equals("true")) {//该孔曲线显示
+                if (famResult != null) {
                     Line line = new Line(getListVals(famResult, i, time, type));
                     line.setColor(colors[num]);
                     line.setCubic(true);
                     line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
                 }
-                if(hexResult != null) {
+                if (hexResult != null) {
                     Line line = new Line(getListVals(hexResult, i, time, type));
                     line.setColor(colors[num]);
                     line.setCubic(true);
@@ -358,33 +359,32 @@ public class GraphContentFragment extends Fragment {
     }
 
     /**
-     *
      * @param result fam/hex统计到的数据
-     * @param hole 孔的位数，key
-     * @param time 已运行次数
+     * @param hole   孔的位数，key
+     * @param time   已运行次数
      * @return
      */
     private List<PointValue> getListVals(Map<String, List<String>> result, int hole, int time, int type) {
         List<String> famTemp = result.get(String.valueOf(hole));//每个孔的数据总数
         List<PointValue> listVals = new ArrayList<PointValue>();
         //listVals.add(new PointValue(0, 0));//起点是原点,不需要起点
-        if(time < 20){//确保每一个孔至少有20个数据,测试数据
+        if (time < 20) {//确保每一个孔至少有20个数据,测试数据
             time = 20;
         }
-        if(time >= famTemp.size()) {//运行时间最大不能超过采集到的数据总数
+        if (time >= famTemp.size()) {//运行时间最大不能超过采集到的数据总数
             time = famTemp.size();
         }
-        if(type == 1) {
+        if (type == 1) {
             listVals.add(new PointValue(0, 0));//扩增起始值为0分
-        } else if(type == 2) {
+        } else if (type == 2) {
             listVals.add(new PointValue(Float.parseFloat(paras.get("dissolution_tempnum_edit")), 0));//溶解起始值为起始温度
         }
-        for(int j=0;j<time;j++) {
+        for (int j = 0; j < time; j++) {
             PointValue tempPoint = new PointValue();
-            if(type == 1){
-                tempPoint.set(Float.parseFloat(mu.getTwoPointData((j+1)/mu.hourTime)), Float.parseFloat(famTemp.get(j)));
-            } else if(type == 2) {
-                double temp = Double.parseDouble(paras.get("dissolution_tempnum_edit")) + (j+1)*Double.parseDouble(paras.get("change_counttemp_edit"));//每一个点的温度值
+            if (type == 1) {
+                tempPoint.set(Float.parseFloat(mu.getTwoPointData((j + 1) / mu.hourTime)), Float.parseFloat(famTemp.get(j)));
+            } else if (type == 2) {
+                double temp = Double.parseDouble(paras.get("dissolution_tempnum_edit")) + (j + 1) * Double.parseDouble(paras.get("change_counttemp_edit"));//每一个点的温度值
                 tempPoint.set((float) temp, Float.parseFloat(famTemp.get(j)));
             }
 
@@ -394,6 +394,7 @@ public class GraphContentFragment extends Fragment {
     }
 
     MyUtil mu = MyUtil.getInstance();
+
     public void setStopbtnOnClickable() {
         mu.setStopbtnOnClickable(startRecordData, stopRecordData);
     }
@@ -423,7 +424,7 @@ public class GraphContentFragment extends Fragment {
     }
 
     public void setAmpButtonStyle(boolean flag) {
-        if(flag) {//选中
+        if (flag) {//选中
             increaseBtn.setTag("true");
             increaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_selected_style, null));
             dissolutionType.put("amp_btn", "true");
@@ -435,8 +436,8 @@ public class GraphContentFragment extends Fragment {
     }
 
     public void setDisButtonStyle(boolean flag) {
-        if(paras.get("dissolution_graph_choice").equals("true")) {
-            if(flag) {
+        if (paras.get("dissolution_graph_choice").equals("true")) {
+            if (flag) {
                 decreaseBtn.setTag("true");
                 decreaseBtn.setBackground(getResources().getDrawable(R.drawable.btn_selected_style, null));
                 dissolutionType.put("dis_btn", "true");
@@ -449,12 +450,12 @@ public class GraphContentFragment extends Fragment {
     }
 
     public void setRunRecordBtn() {
-        if(increaseBtn == null) {//第一次运行还未实例化
+        if (increaseBtn == null) {//第一次运行还未实例化
             return;
         }
         setStopbtnOnClickable();
         setAmpButtonStyle(true);
-        if(paras.get("dissolution_graph_choice").equals("true")) {
+        if (paras.get("dissolution_graph_choice").equals("true")) {
             setDecreaseBtnTrue();
         } else {
             setDecreaseBtnFalse();
@@ -462,12 +463,12 @@ public class GraphContentFragment extends Fragment {
     }
 
     public void setStopRecordBtn() {
-        if(increaseBtn == null) {//第一次运行还未实例化
+        if (increaseBtn == null) {//第一次运行还未实例化
             return;
         }
         setRunbtnOnClickable();
         setAmpButtonStyle(false);
-        if(paras.get("dissolution_graph_choice").equals("true")) {
+        if (paras.get("dissolution_graph_choice").equals("true")) {
             setDisButtonStyle(false);
         }
     }
@@ -494,9 +495,9 @@ public class GraphContentFragment extends Fragment {
             List<AxisValue> listAxis = new ArrayList<AxisValue>();
             //String[] xLabel = {"0","0.07","0.14","0.21","0.28","0.35","0.42","0.49","0.56","0.63","0.70","0.77","0.84","0.91","0.98"};
             try {
-                if(result != null) {
+                if (result != null) {
                     JSONArray dataArr = new JSONArray(result);
-                    for(int i=0;i<dataArr.length();i++) {
+                    for (int i = 0; i < dataArr.length(); i++) {
                         JSONObject tempObj = dataArr.getJSONObject(i);
                         PointValue tempPoint = new PointValue();
                         tempPoint.set(Float.parseFloat(tempObj.getString("increase_efficiency")), Float.parseFloat(tempObj.getString("increase_multiple")));

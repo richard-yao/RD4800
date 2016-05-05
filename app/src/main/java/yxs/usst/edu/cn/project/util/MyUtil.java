@@ -3,6 +3,7 @@ package yxs.usst.edu.cn.project.util;
 import android.graphics.Color;
 import android.os.Environment;
 import android.widget.Button;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,7 +28,6 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import yxs.usst.edu.cn.project.MainActivity;
 import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 
 /**
@@ -94,19 +94,19 @@ public class MyUtil {
 
     public void createInitializeFolds() {
         File file = new File(DevicePath.getInstance().getRootPath());
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.mkdir();//创建应用程序根目录
         }
         file = new File(DevicePath.getInstance().getLocalPath());
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.mkdir();//创建存放实验结果的目录
         }
         file = new File(DevicePath.getInstance().getDissolutionPath());
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.mkdir();//创建存放溶解数据的目录
         }
         file = new File(DevicePath.getInstance().getAmpDataPath());
-        if(!file.exists()) {
+        if (!file.exists()) {
             file.mkdir();//创建存放扩增数据的目录;
         }
     }
@@ -212,8 +212,7 @@ public class MyUtil {
     }
 
     /**
-     *
-     * @param type 1是单通道，2是双通道
+     * @param type      1是单通道，2是双通道
      * @param chartType 1是恒温扩增曲线，2是溶解曲线
      * @return 读取到的扩增曲线的数据
      */
@@ -224,15 +223,15 @@ public class MyUtil {
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {//存储卡正常挂载
             try {
                 String directory = "";
-                if(chartType == 1) {
+                if (chartType == 1) {
                     directory = DevicePath.getInstance().getAmpDataPath();//扩增数据目录
-                } else if(chartType == 2) {
+                } else if (chartType == 2) {
                     directory = DevicePath.getInstance().getDissolutionPath();//溶解数据目录
                 }
                 File files = new File(directory);
                 File[] listFiles = files.listFiles();
-                if(listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
-                    String dataFile = directory + "/" +listFiles[0].getName();
+                if (listFiles.length == 1 && listFiles[0].getName().endsWith(".xls")) {//该目录下唯一的一个excel就是采集到的数据点
+                    String dataFile = directory + "/" + listFiles[0].getName();
                     InputStream is = new FileInputStream(dataFile);
                     WorkbookSettings workbookSettings = new WorkbookSettings();
                     workbookSettings.setGCDisabled(true);
@@ -263,7 +262,6 @@ public class MyUtil {
     }
 
     /**
-     *
      * @param sheet 输入excel的工作表
      * @return 以孔为key，每行所有数据为value的map
      */
@@ -357,11 +355,11 @@ public class MyUtil {
         int fileMax = 1024 * 1024;
         try {
             File inputFile = new File(fromFile);
-            if(!inputFile.exists()) {
+            if (!inputFile.exists()) {
                 return "error";
             }
             File outFile = new File(toFile);
-            if(!outFile.exists()) {
+            if (!outFile.exists()) {
                 outFile.createNewFile();
             }
             InputStream fosfrom = new FileInputStream(fromFile);
@@ -397,9 +395,8 @@ public class MyUtil {
     }
 
     /**
-     *
-     * @param val1 被除数
-     * @param val2 除数
+     * @param val1   被除数
+     * @param val2   除数
      * @param valNum 小数点后保留位数
      * @return
      */
@@ -410,13 +407,12 @@ public class MyUtil {
     }
 
     /**
-     *
      * @param axisVal 输入y点的值
      * @return 返回均值
      */
     public double getAverageValue(List<String> axisVal) {
         double sum = 0.0;
-        for(int i=0;i<axisVal.size();i++) {
+        for (int i = 0; i < axisVal.size(); i++) {
             sum += Double.parseDouble(axisVal.get(i));
         }
         return divideValue(sum, axisVal.size(), 2);
@@ -424,24 +420,23 @@ public class MyUtil {
 
 
     /**
-     *
      * @param value 采集到的每个孔的连续数据
-     * @param type 数据类型，1是扩增，2是溶解
+     * @param type  数据类型，1是扩增，2是溶解
      * @return 斜率dt以及结果：0阴性 or 1阳性
      */
     public Map<String, String> getChartResult(List<String> value, int type, int time) {
-        if(time < 20){//确保每一个孔至少有20个数据,测试数据
+        if (time < 20) {//确保每一个孔至少有20个数据,测试数据
             time = 20;
         }
-        if(time >= value.size()) {//运行时间最大不能超过采集到的数据总数
+        if (time >= value.size()) {//运行时间最大不能超过采集到的数据总数
             time = value.size();
         }
         value = value.subList(0, time);
         Map<String, String> result = new HashMap<String, String>();
-        if(value != null && value.size() > 0) {
-            if(type == 1) {
+        if (value != null && value.size() > 0) {
+            if (type == 1) {
                 int size = value.size();
-                double aveX = divideValue(Double.valueOf(size+1), 2.0, 2);//x轴连续整数相加求平均(n+1)/2
+                double aveX = divideValue(Double.valueOf(size + 1), 2.0, 2);//x轴连续整数相加求平均(n+1)/2
                 double aveY = getAverageValue(value);
                 /*double r = getCorrelationValue(value, size, aveX, aveY);
                 if(r < 0.5) {//线性不相关，是有波峰的曲线
@@ -459,13 +454,13 @@ public class MyUtil {
                     result.put("result", "2");
                     result.put("dt", "wrong!");
                 }
-                if(dt < dtTypeVal*hourTime) {//如果是阴性的，基于实验数据，dt值不可能大于20，这里默认最大为50,乘以时间60
+                if (dt < dtTypeVal * hourTime) {//如果是阴性的，基于实验数据，dt值不可能大于20，这里默认最大为50,乘以时间60
                     result.put("result", "0");
                     result.put("dt", String.valueOf(dt));
                 } else {//阳性，有波峰
                     result.put("result", "1");
                     double temp = countAmplificationDt(value, divideValue(dt, hourTime, 2));
-                    if(temp != -1.0) {
+                    if (temp != -1.0) {
                         result.put("dt", String.valueOf(temp));
                     } else {
                         result.put("dt", String.valueOf(dt));
@@ -477,7 +472,6 @@ public class MyUtil {
     }
 
     /**
-     *
      * @param value 扩增采集到的数据,默认从1开始计算
      * @return 线性相关系数，0到1之间,,这个线性相关系数似乎没用了，即便趋势是直线，然而如果误差很大还是不准
      */
@@ -485,9 +479,9 @@ public class MyUtil {
         double numerator = 0.0;//分子
         double xDeno = 0.0;
         double yDeno = 0.0;
-        for(int i=0;i<size;i++) {
-            numerator += ((i+1) - aveX)*(Double.parseDouble(value.get(i)) - aveY);
-            xDeno += Math.pow((i+1)-aveX, 2);
+        for (int i = 0; i < size; i++) {
+            numerator += ((i + 1) - aveX) * (Double.parseDouble(value.get(i)) - aveY);
+            xDeno += Math.pow((i + 1) - aveX, 2);
             yDeno += Math.pow((Double.parseDouble(value.get(i)) - aveY), 2);
         }
         double denominator = Math.sqrt(xDeno) * Math.sqrt(yDeno);//分母
@@ -496,16 +490,15 @@ public class MyUtil {
 
 
     /**
-     *
      * @param value 扩增采集到的数据
      * @return 线性系数dt
      */
     public Double getDtValue(List<String> value, int size, double aveX, double aveY) {//注意这里需要将x轴的值转为小时值，所以换算后需要将结果乘以60
         double numerator = 0.0;
         double xDeno = 0.0;
-        for(int i=0;i<size;i++) {
-            numerator += (i+1)*Double.parseDouble(value.get(i));
-            xDeno += Math.pow((i+1), 2);
+        for (int i = 0; i < size; i++) {
+            numerator += (i + 1) * Double.parseDouble(value.get(i));
+            xDeno += Math.pow((i + 1), 2);
         }
         numerator = numerator - size * aveX * aveY;
         double denominator = xDeno - size * Math.pow(aveX, 2);
@@ -514,7 +507,6 @@ public class MyUtil {
     }
 
     /**
-     *
      * @param value 扩增采集到的数据点
      * @return 真正扩增曲线的dt值
      */
@@ -522,17 +514,17 @@ public class MyUtil {
         List<Double> dyList = new ArrayList<Double>();
         List<Double> resultList = new ArrayList<Double>();
         double temp = 0.0;
-        for(int i=0;i<value.size()-1;i++) {
-            temp = Double.parseDouble(value.get(i+1)) - Double.parseDouble(value.get(i));//两点之间的差值
+        for (int i = 0; i < value.size() - 1; i++) {
+            temp = Double.parseDouble(value.get(i + 1)) - Double.parseDouble(value.get(i));//两点之间的差值
             dyList.add(temp);
         }
-        for(int i=0;i<dyList.size()-1;i++) {//根据实验结果，前五分钟一般不会有明显变化
-            if(dyList.get(i) > curveDt && dyList.get(i+1) > curveDt) {//连续两个点斜率大于拟合拟合直线的斜率
+        for (int i = 0; i < dyList.size() - 1; i++) {//根据实验结果，前五分钟一般不会有明显变化
+            if (dyList.get(i) > curveDt && dyList.get(i + 1) > curveDt) {//连续两个点斜率大于拟合拟合直线的斜率
                 resultList.add(dyList.get(i));
                 continue;
             }
-            if(dyList.get(i) > curveDt && dyList.get(i+1) < curveDt) {//曲线开始平稳乃至下降
-                if(resultList.size() >= 1) {
+            if (dyList.get(i) > curveDt && dyList.get(i + 1) < curveDt) {//曲线开始平稳乃至下降
+                if (resultList.size() >= 1) {
                     resultList.add(dyList.get(i));
                     break;
                 } else {
@@ -540,7 +532,7 @@ public class MyUtil {
                 }
             }
         }
-        if(resultList.size() == 0) {//未找到比拟合直线斜率大的
+        if (resultList.size() == 0) {//未找到比拟合直线斜率大的
             return -1.0;
         } else {
             return maxValue(resultList);
@@ -549,10 +541,10 @@ public class MyUtil {
 
     public Double maxValue(List<Double> inputList) {
         double temp = 0;
-        if(inputList != null && inputList.size() > 1) {
+        if (inputList != null && inputList.size() > 1) {
             temp = inputList.get(0);
-            for(int i=1;i<inputList.size();i++) {
-                temp = temp>inputList.get(i)?temp:inputList.get(i);
+            for (int i = 1; i < inputList.size(); i++) {
+                temp = temp > inputList.get(i) ? temp : inputList.get(i);
             }
         }
         return temp;

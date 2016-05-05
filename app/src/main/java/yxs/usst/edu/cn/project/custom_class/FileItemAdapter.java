@@ -27,11 +27,11 @@ public class FileItemAdapter extends ArrayAdapter<FileItem> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(int position, View convertView, ViewGroup parent) {
         FileItem fileItem = getItem(position);
         LinearLayout linearLayout = new LinearLayout(getContext());
         String inflater = Context.LAYOUT_INFLATER_SERVICE;
-        LayoutInflater vi = (LayoutInflater)getContext().getSystemService(inflater);
+        LayoutInflater vi = (LayoutInflater) getContext().getSystemService(inflater);
         vi.inflate(resourceId, linearLayout, true);
         ImageView imageView = (ImageView) linearLayout.findViewById(R.id.filedialogitem_img);
         TextView fileName = (TextView) linearLayout.findViewById(R.id.filedialogitem_name);

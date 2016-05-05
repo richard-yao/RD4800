@@ -53,8 +53,9 @@ public class OpenFileDialog {
     private TextView inputTip;
 
     public static OpenFileDialog openFileDialog = new OpenFileDialog();
+
     public static OpenFileDialog getInstance() {
-        return  openFileDialog;
+        return openFileDialog;
     }
 
     // 参数说明
@@ -69,20 +70,20 @@ public class OpenFileDialog {
     //	文件夹的索引为sFolder;
     //	默认图标的索引为sEmpty;
     //	其他的直接根据后缀进行索引，比如.wav文件图标的索引为"wav"
-    public Dialog createDialog(final Context context, int type , CallbackBundle callback, String suffix, Map<String, Integer> images) {
+    public Dialog createDialog(final Context context, int type, CallbackBundle callback, String suffix, Map<String, Integer> images) {
         AlertDialog builder = new AlertDialog.Builder(context).create();
         RelativeLayout showView = new RelativeLayout(context);
         final FileSelectView fileSelectView = new FileSelectView(context, callback, suffix, images, type);
         showView.addView(fileSelectView, 0);
-         if(type == 2) {//save file
-             RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) fileSelectView.getLayoutParams();
-             lp.setMargins(0, 0, 0, 200);
-             fileSelectView.setLayoutParams(lp);
-             final LinearLayout childView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.new_file_dialog, showView, false);//file name when save file button click
-             lp = (RelativeLayout.LayoutParams) childView.getLayoutParams();
-             lp.setMargins(0, -20, 0 , 0);
-             showView.addView(childView, 1);
-             initNewFileDialog(childView, builder, fileSelectView, context);
+        if (type == 2) {//save file
+            RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) fileSelectView.getLayoutParams();
+            lp.setMargins(0, 0, 0, 200);
+            fileSelectView.setLayoutParams(lp);
+            final LinearLayout childView = (LinearLayout) LayoutInflater.from(context).inflate(R.layout.new_file_dialog, showView, false);//file name when save file button click
+            lp = (RelativeLayout.LayoutParams) childView.getLayoutParams();
+            lp.setMargins(0, -20, 0, 0);
+            showView.addView(childView, 1);
+            initNewFileDialog(childView, builder, fileSelectView, context);
         }
         builder.setView(showView);
         builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -99,6 +100,7 @@ public class OpenFileDialog {
 
         TextWatcher textWatcher = new TextWatcher() {
             String tempText;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -112,10 +114,10 @@ public class OpenFileDialog {
             @Override
             public void afterTextChanged(Editable s) {
                 MyUtil mu = MyUtil.getInstance();
-                if(tempText.toString().trim().equals("")) {
+                if (tempText.toString().trim().equals("")) {
                     return;
                 }
-                if(!mu.validateText(tempText)) {
+                if (!mu.validateText(tempText)) {
                     inputTip.setText("文件名称含有非法字符!");
                     inputTip.setTextColor(Color.RED);
                     inputTip.setFocusable(true);
@@ -134,23 +136,23 @@ public class OpenFileDialog {
             public void onClick(View v) {
                 MyUtil mu = MyUtil.getInstance();
                 String newFile = fileName.getText().toString().trim();
-                if(newFile.equals("")) {
+                if (newFile.equals("")) {
                     Toast.makeText(context, "Please input excel file name.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(resultData == null) {
+                if (resultData == null) {
                     Toast.makeText(context, "You cannot save as another excel when there is none data", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Bundle directroy = fileSelectView.getFileParaBack();
                 String filepath = "";
-                if(directroy == null) {//没有点击进入,就在程序目录
+                if (directroy == null) {//没有点击进入,就在程序目录
                     filepath = fileSelectView.getPath();//default directory
                 } else {
                     filepath = directroy.getString("path");
                 }
-                if(filepath != null && !filepath.equals("")) {
-                    if(filepath.endsWith(".xls")) {
+                if (filepath != null && !filepath.equals("")) {
+                    if (filepath.endsWith(".xls")) {
                         filepath = filepath.substring(0, filepath.lastIndexOf("/"));
                     }
                     mu.createNewExcel(resultData, para, newFile, filepath);
@@ -305,10 +307,10 @@ public class OpenFileDialog {
             } else {
                 File fl = new File(pt);
                 if (fl.isFile()) {
-                    if(type == 1) {
+                    if (type == 1) {
                         // 如果是文件
                         staticDialog.dismiss();
-                    } else if(type == 2) {
+                    } else if (type == 2) {
                         return;
                     }
                     // 设置回调的返回值

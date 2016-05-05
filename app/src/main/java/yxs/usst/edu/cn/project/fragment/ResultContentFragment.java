@@ -52,14 +52,15 @@ public class ResultContentFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View chatView = inflater.inflate(R.layout.result_content_fragment, container,false);
+        View chatView = inflater.inflate(R.layout.result_content_fragment, container, false);
         resultLv = (ListView) chatView.findViewById(R.id.resultViewShow);
         return chatView;
     }
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState){
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         return;
     }
@@ -87,8 +88,8 @@ public class ResultContentFragment extends Fragment {
 
     public void showResultData() {
         resultData = showResultListData.showResultData();
-        if(resultData != null && resultData.size() > 0) {
-            SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(),resultData,
+        if (resultData != null && resultData.size() > 0) {
+            SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(), resultData,
                     R.layout.result_list_item, items, itemId);
             resultLv.setAdapter(simpleAdapter);
         } else {
@@ -98,7 +99,7 @@ public class ResultContentFragment extends Fragment {
 
     public void clearResultData() {
         resultData = new ArrayList<Map<String, Object>>();
-        SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(),resultData,
+        SimpleAdapter simpleAdapter = new SimpleAdapter(listViewListener.getMainContext(), resultData,
                 R.layout.result_list_item, items, itemId);
         resultLv.setAdapter(simpleAdapter);
     }
