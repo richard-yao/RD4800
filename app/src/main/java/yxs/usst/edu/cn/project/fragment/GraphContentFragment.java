@@ -33,6 +33,7 @@ import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.ValueShape;
 import lecho.lib.hellocharts.view.LineChartView;
 import yxs.usst.edu.cn.project.R;
 import yxs.usst.edu.cn.project.interface_class.CollectData;
@@ -287,11 +288,19 @@ public class GraphContentFragment extends Fragment {
     public void drawChart(int time) {
         Map<String, List<String>> famResult = null;
         Map<String, List<String>> hexResult = null;
+        double initTem = Double.parseDouble(paras.get("dissolution_tempnum_edit"));
+        double tempDis = Double.parseDouble(paras.get("change_counttemp_edit"));
         int type = 0;
         if (dissolutionType.get("amp_btn").equals("true")) {
             type = 1;
+            if(labData == null || labData.size() == 0) {
+                return;
+            }
         } else if (dissolutionType.get("dis_btn").equals("true")) {
             type = 2;
+            if(dissolutionData == null || labData.size() == 0) {
+                return;
+            }
         }
         if (type == 1) {
             if (chartType.get("fam_checkbox").equals("true")) {
@@ -322,6 +331,14 @@ public class GraphContentFragment extends Fragment {
                     line.setCubic(true);
                     line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
+                    if(type == 2) {
+                        Line lineFamDt = new Line(mu.getDisDtValue(famResult.get(String.valueOf(i)),time, initTem, tempDis));
+                        lineFamDt.setColor(colors[num]);
+                        lineFamDt.setCubic(true);
+                        lineFamDt.setShape(ValueShape.DIAMOND);
+                        lineFamDt.setHasLabelsOnlyForSelected(true);
+                        lines.add(lineFamDt);
+                    }
                 }
                 if (hexResult != null) {
                     Line line = new Line(getListVals(hexResult, i, time, type));
@@ -329,6 +346,14 @@ public class GraphContentFragment extends Fragment {
                     line.setCubic(true);
                     line.setHasLabelsOnlyForSelected(true);
                     lines.add(line);
+                    if(type == 2) {
+                        Line lineHexDt = new Line(mu.getDisDtValue(hexResult.get(String.valueOf(i)),time, initTem, tempDis));
+                        lineHexDt.setColor(colors[num]);
+                        lineHexDt.setCubic(true);
+                        lineHexDt.setShape(ValueShape.DIAMOND);
+                        lineHexDt.setHasLabelsOnlyForSelected(true);
+                        lines.add(lineHexDt);
+                    }
                 }
             } else {
                 continue;

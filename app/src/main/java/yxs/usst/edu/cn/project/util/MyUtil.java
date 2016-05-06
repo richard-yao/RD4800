@@ -28,6 +28,7 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+import lecho.lib.hellocharts.model.PointValue;
 import yxs.usst.edu.cn.project.setting_paras.DevicePath;
 
 /**
@@ -554,5 +555,28 @@ public class MyUtil {
         return temp;
     }
 
-
+    public List<PointValue> getDisDtValue(List<String> result,int time, double initVal, double dis) {
+        List<PointValue> listVals = new ArrayList<PointValue>();
+        if(result == null || result.size() == 0) {
+            return listVals;
+        }
+        double dt = 0.0;
+        double xVal = 0.0;
+        if (time < 20) {//确保每一个孔至少有20个数据,测试数据
+            time = 20;
+        }
+        if (time >= result.size()) {//运行时间最大不能超过采集到的数据总数
+            time = result.size();
+        }
+        listVals.add(new PointValue((float)initVal, 0));
+        for(int i=0;i<time-1;i++) {
+            PointValue pointValue = new PointValue();
+            dt = Double.parseDouble(result.get(i+1)) - Double.parseDouble(result.get(i));
+            dt = divideValue(dt, dis, 2);
+            xVal = initVal + (i+1)*dis;
+            pointValue.set((float)xVal, (float)dt);
+            listVals.add(pointValue);
+        }
+        return listVals;
+    }
 }
