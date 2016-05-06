@@ -11,6 +11,7 @@ public class DevicePath {
     public static String localPath;//存放实验结果的本地路径
     public static String ampDataPath;//存放采集到的扩增数据的路径
     public static String dissolutionPath;//存放采集到的溶解数据的路径
+    public static String projectSdPath;//外置存储卡中的应用路径
 
     public static DevicePath getInstance() {
         return devicePath;
@@ -46,5 +47,13 @@ public class DevicePath {
 
     public void setDissolutionPath(String dissolutionPath) {
         this.dissolutionPath = dissolutionPath;
+    }
+
+    public String getProjectSdPath() {
+        return projectSdPath;
+    }
+
+    public void setProjectSdPath(String projectSdPath) {
+        this.projectSdPath = projectSdPath;
     }
 }

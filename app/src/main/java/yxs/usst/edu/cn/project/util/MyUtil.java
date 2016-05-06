@@ -109,6 +109,10 @@ public class MyUtil {
         if (!file.exists()) {
             file.mkdir();//创建存放扩增数据的目录;
         }
+        file = new File(DevicePath.getInstance().getProjectSdPath());
+        if (!file.exists()) {
+            file.mkdir();//在外置sd卡中创建项目目录;
+        }
     }
 
     public List<Map<String, Object>> readExcel(String[] para, String fileName, String directory) {

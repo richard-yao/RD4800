@@ -1,5 +1,6 @@
 package yxs.usst.edu.cn.project.fragment;
 
+import android.content.ContentResolver;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -42,6 +43,16 @@ public class ToolContentFragment extends Fragment {
         this.listViewListener = lvl;
     }
 
+    public interface CustomContentResolver {
+        public ContentResolver getCustomContentResolver();
+    }
+
+    public CustomContentResolver contentResolver;
+
+    public void setContentResolver(CustomContentResolver contentResolver) {
+        this.contentResolver = contentResolver;
+    }
+
     MyUtil mu = MyUtil.getInstance();
     public static String localPath = "";
     String sdCardPath = "";
@@ -64,9 +75,11 @@ public class ToolContentFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         localPath = DevicePath.getInstance().getLocalPath();
         if (mu.getExtSdCardPath() != null) {
-            sdCardPath = mu.getExtSdCardPath() + "/" + appName;
+            String temp = DevicePath.getInstance().getProjectSdPath();
+            temp = temp.substring(temp.indexOf("Android"), temp.length());
+            sdCardPath = mu.getExtSdCardPath() + "/" + temp;
         }
-        //sdCardPath = mu.getExtSdCardPath() + "/" + appName;
+        //sdCardPath = DevicePath.getInstance().getProjectSdPath();
         bindControlBtnListener();
         showFilesList();
     }
@@ -155,9 +168,6 @@ public class ToolContentFragment extends Fragment {
                 localList = new ArrayList<FileItem>();
                 FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, localList);
                 localFiles.setAdapter(localAdapter);
-                TextView tip = new TextView(listViewListener.getMainContext(), null);
-                tip.setText("再怎么看也没有了");
-                localFiles.setEmptyView(tip);
             }
         }
     }
@@ -168,10 +178,7 @@ public class ToolContentFragment extends Fragment {
             if (extList == null || extList.size() == 0) {
                 extList = new ArrayList<FileItem>();
                 FileItemAdapter localAdapter = new FileItemAdapter(listViewListener.getMainContext(), R.layout.file_directory, extList);
-                localFiles.setAdapter(localAdapter);
-                TextView tip = new TextView(listViewListener.getMainContext(), null);
-                tip.setText("再怎么看也没有了");
-                outFiles.setEmptyView(tip);
+                outFiles.setAdapter(localAdapter);
                 return;
             }
             if (extList != null && extList.size() > 0) {

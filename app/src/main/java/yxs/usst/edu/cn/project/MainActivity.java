@@ -1,6 +1,7 @@
 package yxs.usst.edu.cn.project;
 
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
@@ -86,6 +87,7 @@ public class MainActivity extends FragmentActivity {
         DevicePath.getInstance().setLocalPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.amplification));
         DevicePath.getInstance().setAmpDataPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.ampData));
         DevicePath.getInstance().setDissolutionPath(Environment.getExternalStorageDirectory().getPath() + "/" + getResources().getString(R.string.app_name) + "/" + getResources().getString(R.string.disData));
+        DevicePath.getInstance().setProjectSdPath(getExternalFilesDir(null).getAbsolutePath());
         mu.createInitializeFolds();
     }
 
@@ -310,6 +312,12 @@ public class MainActivity extends FragmentActivity {
             @Override
             public Context getMainContext() {
                 return getInstance();
+            }
+        });
+        mToolRg.setContentResolver(new ToolContentFragment.CustomContentResolver() {
+            @Override
+            public ContentResolver getCustomContentResolver() {
+                return getContentResolver();
             }
         });
         mFragmentList.add(mFileFg);
