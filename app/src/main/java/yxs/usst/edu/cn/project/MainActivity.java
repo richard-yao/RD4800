@@ -613,7 +613,6 @@ public class MainActivity extends FragmentActivity {
             }
             runTime = 0;
         }
-
     }
 
     private void printOutResult(int runTime) {//显示扩增实验结果

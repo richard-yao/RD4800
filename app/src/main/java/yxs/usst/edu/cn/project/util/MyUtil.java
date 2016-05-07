@@ -89,7 +89,7 @@ public class MyUtil {
 
     public String formatDate() {
         Date date = new Date();
-        SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
         return dateFormater.format(date);
     }
 
